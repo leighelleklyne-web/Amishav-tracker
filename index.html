@@ -317,6 +317,11 @@ header.top{background:#fff;color:var(--ink);box-shadow:0 1px 0 var(--line),0 4px
       <div class="chipEd" id="uSnifChips"></div>
     </div>
     <div id="reqBox"></div>
+    <div class="card hid" id="allSnifBox" style="margin:14px 0">
+      <b>כל הסניפים במערכת</b>
+      <p class="small" style="margin:2px 0 8px">זו הרשימה שהמדריכים בוחרים ממנה בהרשמה. לחיצה על × מוחקת את הסניף מהרשימה ומכל הרכזות שמחזיקות בו. החניכים והמדריכים שכבר בסניף לא נמחקים.</p>
+      <div class="chipEd" id="allSnifChips"></div>
+    </div>
     <div class="card hid" id="resetBox" style="margin:14px 0;border:2px solid var(--r)">
       <b>איפוס מלא של האתר</b>
       <p class="small" style="margin:2px 0 8px">מוחק את <b>כל</b> המידע: כל החניכים וההיסטוריה, כל הפרופילים של אנשי הצוות, ואת רשימת הסניפים. בסוף גם החשבון שלך נמחק, והאתר חוזר להיות ריק לגמרי. אי אפשר לבטל את זה.</p>
@@ -648,7 +653,7 @@ function openPw(u,forced){
   $('pDlg').showModal();$('pNew').focus();
 }
 $('pDlg').addEventListener('cancel',e=>{if($('pCancel').classList.contains('hid'))e.preventDefault()});
-$('logout').addEventListener('click',()=>{if($('pDlg').open)$('pDlg').close();if(fb)fb.signOut();me=null;store.del('am_sess');location.hash='';snifSel='';regSnifs.length=0;chipEd($('lSnifChips'),regSnifs);['lName','lSnif','lUser','lPass'].forEach(id=>$(id).value='');authMode='login';$('lErr').textContent='';renderAll()});
+$('logout').addEventListener('click',()=>{backfilled=false;if($('pDlg').open)$('pDlg').close();if(fb)fb.signOut();me=null;store.del('am_sess');location.hash='';snifSel='';regSnifs.length=0;chipEd($('lSnifChips'),regSnifs);['lName','lSnif','lUser','lPass'].forEach(id=>$(id).value='');authMode='login';$('lErr').textContent='';renderAll()});
 function restore(){
   if(mode==='firebase'){
     me=fbUser?(userBy(String(fbUser.email||'').toLowerCase())||null):null;
@@ -838,6 +843,10 @@ function renderUsers(){
   if(!isMgr())return;
   const canEd=me.role==='rakaz'||me.role==='admin';
   $('resetBox').classList.toggle('hid',!OWNERS.includes(me.username));
+  $('allSnifBox').classList.toggle('hid',!OWNERS.includes(me.username));
+  if(OWNERS.includes(me.username)){const all=[...new Set([...snifNames,...users.filter(u=>u.role==='rakaz'||u.role==='admin').flatMap(u=>snifsOf(u,true))])].sort(heSort);
+    $('allSnifChips').innerHTML=all.length?all.map(x=>{const rk=users.filter(u=>(u.role==='rakaz'||u.role==='admin')&&snifsOf(u,true).includes(x)).map(u=>u.name);
+      return `<span>${esc(x)}${rk.length?` <small style="font-weight:400;color:var(--mut)">(${esc(rk.join(', '))})</small>`:''}<button type="button" data-arm="${esc(x)}" aria-label="מחיקת ${esc(x)}">×</button></span>`}).join(''):'<span class="small" style="background:none">אין סניפים ברשימה</span>'}
   $('rsPassWrap').classList.toggle('hid',!(mode==='firebase'&&fb.currentUser&&fb.currentUser.providerData.some(p=>p.providerId==='password')));$('uSnifBox').classList.toggle('hid',!canEd);
   if(canEd){const mine=snifsOf(me,true);$('uSnifChips').innerHTML=mine.map(x=>`<span>${esc(x)}<button type="button" data-urm="${esc(x)}" aria-label="הסרת ${esc(x)}">×</button></span>`).join('')}
   const sn=mySnifs();
@@ -884,6 +893,13 @@ $('uSnifChips').addEventListener('click',async e=>{const b=e.target.closest('[da
   if(b.dataset.sure!=='1'){b.dataset.sure='1';b.textContent='להסיר?';return}
   if(await saveMySnifim(snifsOf(me,true).filter(x=>x!==b.dataset.urm)))toast(`סניף ${b.dataset.urm} הוסר מהרשימה שלך`)});
 
+$('allSnifChips').addEventListener('click',async e=>{const b=e.target.closest('[data-arm]');if(!b)return;
+  if(b.dataset.sure!=='1'){b.dataset.sure='1';b.textContent='למחוק?';return}
+  const x=b.dataset.arm;b.disabled=true;
+  try{for(const u of users.filter(u=>(u.role==='rakaz'||u.role==='admin')&&snifsOf(u,true).includes(x)))await cUsers.doc(u.username).update({snifim:snifsOf(u,true).filter(y=>y!==x)});
+    await publishSnifim(snifNames.filter(y=>y!==x));toast(`הסניף ${x} נמחק מהרשימה`)}
+  catch(err){toast(mode==='firebase'?fbErr(err):'המחיקה נכשלה')}
+});
 $('rsBtn').addEventListener('click',async()=>{
   const E=t=>{$('rsErr').textContent=t};E('');
   if(norm($('rsWord').value)!=='איפוס')return E('כתבו "איפוס" בשדה כדי לאשר');
@@ -1061,9 +1077,10 @@ function startSubs(){
   },fail));
 }
 function maybeBackfill(){
-  if(backfilled||!metaLoaded||!me||!(me.role==='rakaz'||me.role==='admin'))return;
-  const mine=snifsOf(me,true);if(!mine.some(s=>!snifNames.includes(s)))return;
-  backfilled=true;publishSnifim([...snifNames,...mine]);
+  if(backfilled||!metaLoaded||!uOk||!me)return;
+  backfilled=true;
+  if(!(me.role==='rakaz'||me.role==='admin')||OWNERS.includes(me.username))return;
+  const mine=snifsOf(me,true);if(mine.some(s=>!snifNames.includes(s)))publishSnifim([...snifNames,...mine]);
 }
 function stopSubs(){unsubs.forEach(f=>{try{f()}catch(e){}});unsubs=[]}
 renderAuth();note('טוען…');
