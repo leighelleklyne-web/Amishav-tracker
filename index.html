@@ -206,8 +206,6 @@ dialog h2{margin-bottom:14px}
       <h2 style="font-size:26px" id="lTitle">היי, טוב לראות אותך</h2>
       <p class="small compOnly hid" style="margin:0" id="compTxt"></p>
       <div class="authTabs credOnly"><button type="button" id="tLogin" aria-pressed="true">כניסה</button><button type="button" id="tReg" aria-pressed="false">הרשמה</button></div>
-      <button type="button" class="gbtn hid" id="gBtn"><svg viewBox="0 0 48 48" width="22" height="22" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34.1 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34.1 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg><span>המשך עם Google</span></button>
-      <div class="or hid" id="gOr">או עם אימייל וסיסמה</div>
       <div class="regOnly"><label for="lName">שם מלא</label><input id="lName" autocomplete="name"></div>
       <div class="regOnly"><label>אני…</label>
         <div class="roles" id="roleBtns">
@@ -220,6 +218,8 @@ dialog h2{margin-bottom:14px}
       <div class="regOnly hid" id="manySnif"><label for="lSnifAdd">הסניפים שאני מרכז/ת</label>
         <div class="addRow"><input id="lSnifAdd" list="dlSnif" autocomplete="off" placeholder="שם סניף"><button type="button" id="lSnifBtn">הוספה</button></div>
         <div class="chipEd" id="lSnifChips"></div></div>
+      <button type="button" class="gbtn hid" id="gBtn"><svg viewBox="0 0 48 48" width="22" height="22" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34.1 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34.1 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg><span id="gTxt">המשך עם Google</span></button>
+      <div class="or hid" id="gOr">או עם אימייל וסיסמה</div>
       <div class="credOnly"><label for="lUser">אימייל</label><input id="lUser" type="email" dir="ltr" autocomplete="email" autocapitalize="none" inputmode="email"></div>
       <p class="small forgotOnly hid" style="margin:0">כתבו את האימייל שאיתו נרשמתם. הבקשה תגיע לרכז/ת או לשמיניסט/ית של הסניף, והם יקבעו לכם סיסמה זמנית ויעבירו לכם אותה. בכניסה הבאה תתבקשו לבחור סיסמה חדשה.</p>
       <div class="noForgot credOnly"><label for="lPass">סיסמה</label><div class="pwbox"><input id="lPass" type="password" dir="ltr" autocomplete="current-password"><button type="button" class="eye" data-eye="lPass" aria-label="הצגת הסיסמה" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/><path class="slash" d="M4 4l16 16"/></svg></button></div>
@@ -279,6 +279,12 @@ dialog h2{margin-bottom:14px}
   <!-- RAKAZ: users -->
   <section id="vUsers" class="hid">
     <h2>הצוות בסניפים שלי</h2>
+    <div class="card" id="uSnifBox" style="margin:14px 0">
+      <b>הסניפים שלי</b>
+      <p class="small" style="margin:2px 0 8px">נוסף לך סניף? מוסיפים אותו כאן, והוא יופיע מיד ברשימה של המדריכים בהרשמה.</p>
+      <div class="addRow"><input id="uSnifAdd" list="dlSnif" autocomplete="off" placeholder="שם הסניף החדש"><button type="button" class="pri" id="uSnifBtn">הוספת סניף</button></div>
+      <div class="chipEd" id="uSnifChips"></div>
+    </div>
     <div id="reqBox"></div>
     <p class="small">כל אנשי הצוות נרשמים בעצמם בעמוד הכניסה. כאן אפשר לטפל בבקשות "שכחתי סיסמה", לאפס סיסמה או למחוק משתמש.</p>
     <div class="scroll"><table class="stack"><thead><tr><th>שם</th><th>אימייל</th><th>תפקיד</th><th>סניף</th><th>חניכים</th><th></th></tr></thead><tbody id="uBody"></tbody></table></div>
@@ -458,7 +464,8 @@ function renderAuth(){
   document.querySelectorAll('.compOnly').forEach(e=>e.classList.toggle('hid',!comp));
   $('lTitle').textContent=comp?'עוד רגע מסיימים…':'היי, טוב לראות אותך';
   $('compTxt').innerHTML=comp&&fbUser?`התחברת בתור <bdi dir="ltr">${esc(fbUser.email)}</bdi>. כדי לסיים, ספרו לנו מי אתם ומאיזה סניף.`:'';
-  $('gBtn').classList.toggle('hid',mode!=='firebase'||comp||fg);$('gOr').classList.toggle('hid',mode!=='firebase'||comp||fg);
+  $('gBtn').classList.toggle('hid',mode!=='firebase'||comp||fg);$('gTxt').textContent=reg?'הרשמה עם Google':'המשך עם Google';
+  $('gOr').textContent=reg?'או הרשמה עם אימייל וסיסמה':'או עם אימייל וסיסמה';$('gOr').classList.toggle('hid',mode!=='firebase'||comp||fg);
   document.querySelectorAll('.forgotOnly').forEach(e=>e.classList.toggle('hid',!fg));
   $('loginF').querySelector('.noForgot').classList.toggle('hid',fg||comp);
   $('forgot').textContent=comp?'ביטול ויציאה':fg?'חזרה לכניסה':'שכחתי סיסמה';$('forgot').classList.toggle('hid',reg&&!comp);
@@ -485,8 +492,31 @@ const setMode=m=>{authMode=m;$('lErr').textContent='';$('lOk').classList.add('hi
 $('tLogin').addEventListener('click',()=>setMode('login'));
 $('tReg').addEventListener('click',()=>setMode('reg'));
 $('forgot').addEventListener('click',()=>{if(authMode==='complete'){if(fb)fb.signOut();setMode('login');return}setMode(authMode==='forgot'?'login':'forgot')});
+function regForm(){
+  const name=norm($('lName').value);
+  if(regRole==='rakaz'&&norm($('lSnifAdd').value))chipAdd($('lSnifAdd'),$('lSnifChips'),regSnifs);
+  const snifim=regRole==='rakaz'?regSnifs.slice():[norm($('lSnif').value)].filter(Boolean);
+  if(!name)return{err:'מלאו שם מלא'};
+  if(!snifim.length)return{err:regRole==='rakaz'?'הוסיפו לפחות סניף אחד':(snifNames.length?'בחרו סניף':'עדיין אין סניפים – הרכז/ת צריך/ה להירשם קודם')};
+  if(regRole!=='rakaz'&&!snifNames.includes(snifim[0]))return{err:'בחרו סניף מהרשימה'};
+  return{name,snifim};
+}
 $('gBtn').addEventListener('click',async()=>{
   $('lErr').textContent='';const pr=new firebase.auth.GoogleAuthProvider();pr.setCustomParameters({prompt:'select_account'});
+  if(authMode==='reg'){
+    const f=regForm();if(f.err){$('lErr').textContent=f.err;return}
+    registering=true;$('gBtn').disabled=true;
+    try{const c=await fb.signInWithPopup(pr),gu=(c&&c.user)||fb.currentUser,em=String(gu.email||'').toLowerCase();
+      const ex=await cUsers.doc(em).get();
+      if(ex.exists){toast('כבר יש לך חשבון – נכנסת אליו')}
+      else{await cUsers.doc(em).set({username:em,email:em,uid:gu.uid,name:f.name,role:regRole,snifim:f.snifim,created:new Date().toISOString()});
+        if(regRole==='rakaz')await publishSnifim([...snifNames,...f.snifim]);
+        location.hash=['rakaz','shmini'].includes(regRole)?'overview':'mine'}}
+    catch(x){if(x&&x.code==='auth/operation-not-allowed')$('lErr').textContent='כניסה עם Google עוד לא הופעלה ב-Firebase';
+      else if(x&&!['auth/popup-closed-by-user','auth/cancelled-popup-request'].includes(x.code))$('lErr').textContent=fbErr(x)}
+    finally{registering=false;$('gBtn').disabled=false;restore();renderAll()}
+    return;
+  }
   try{await fb.signInWithPopup(pr)}
   catch(x){if(x&&(x.code==='auth/popup-blocked'||x.code==='auth/operation-not-supported-in-this-environment')){try{await fb.signInWithRedirect(pr)}catch(y){$('lErr').textContent=fbErr(y)}}
     else if(x&&x.code==='auth/operation-not-allowed')$('lErr').textContent='כניסה עם Google עוד לא הופעלה ב-Firebase';
@@ -762,6 +792,8 @@ $('csvAllHist').addEventListener('click',()=>exportCSV(myAll().flatMap(k=>Object
 /* ---------- rakaz: staff ---------- */
 function renderUsers(){
   if(!isMgr())return;
+  const canEd=me.role==='rakaz'||me.role==='admin';$('uSnifBox').classList.toggle('hid',!canEd);
+  if(canEd){const mine=snifsOf(me,true);$('uSnifChips').innerHTML=mine.map(x=>`<span>${esc(x)}<button type="button" data-urm="${esc(x)}" aria-label="הסרת ${esc(x)}">×</button></span>`).join('')}
   const sn=mySnifs();
   const reqs=resets.filter(r=>r.email!==me.username&&userBy(r.email)&&snifsOf(userBy(r.email)).some(s=>sn.includes(s)));
   $('reqBox').innerHTML=reqs.length?`<div class="card req"><b>בקשות לאיפוס סיסמה (${reqs.length})</b><ul>${reqs.map(r=>{const u=userBy(r.email);return `<li><span><b>${esc(u.name)}</b> · ${esc(ROLE[u.role]||'')} · ${esc(snifsOf(u,true).join(', '))} · <span dir="ltr">${esc(r.email)}</span></span><span class="sp"></span><button class="sm pri" data-pw="${esc(r.email)}">קביעת סיסמה זמנית</button><button class="sm" data-rdel="${esc(r.email)}">ביטול הבקשה</button></li>`}).join('')}</ul></div>`:'';
@@ -790,6 +822,21 @@ $('pFrm').addEventListener('submit',async e=>{
     cResets.doc(pUser).delete().catch(()=>{});
     $('pDlg').close();toast(self?'הסיסמה עודכנה':'הסיסמה הזמנית נשמרה – העבירו אותה הלאה')}catch(err){$('pErr').textContent='העדכון נכשל, נסו שוב'}
 });
+
+async function saveMySnifim(list){
+  const clean=[...new Set(list.map(norm).filter(Boolean))];
+  if(!clean.length){toast('צריך לפחות סניף אחד');return false}
+  try{await cUsers.doc(me.username).update({snifim:clean});
+    await publishSnifim([...users.filter(u=>(u.role==='rakaz'||u.role==='admin')&&u.username!==me.username).flatMap(u=>snifsOf(u,true)),...clean]);return true}
+  catch(e){toast(mode==='firebase'?fbErr(e):'השמירה נכשלה');return false}
+}
+$('uSnifBtn').addEventListener('click',async()=>{const v=norm($('uSnifAdd').value);if(!v)return;
+  if(snifsOf(me,true).includes(v)){toast('הסניף כבר ברשימה');return}
+  if(await saveMySnifim([...snifsOf(me,true),v])){$('uSnifAdd').value='';toast(`סניף ${v} נוסף`)}});
+$('uSnifAdd').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('uSnifBtn').click()}});
+$('uSnifChips').addEventListener('click',async e=>{const b=e.target.closest('[data-urm]');if(!b)return;
+  if(b.dataset.sure!=='1'){b.dataset.sure='1';b.textContent='להסיר?';return}
+  if(await saveMySnifim(snifsOf(me,true).filter(x=>x!==b.dataset.urm)))toast(`סניף ${b.dataset.urm} הוסר מהרשימה שלך`)});
 
 /* ---------- chanich details dialog ---------- */
 function openForm(id){
