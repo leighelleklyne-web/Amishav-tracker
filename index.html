@@ -89,6 +89,12 @@ button.sm{padding:5px 12px;min-height:36px;font-size:14px}
 .req li{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .week{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px;margin:14px 0;box-shadow:var(--sh)}
 .week b{flex:1;text-align:center;font-family:Rubik;font-size:18px}
+.shv-row{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(min(100%,210px),1fr));margin:6px 0 4px}
+.shv{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;box-shadow:var(--sh);display:grid;gap:6px;border-top:5px solid var(--sky)}
+.shv b.n{font-size:30px;font-weight:800;line-height:1}
+.shv .dots{display:flex;gap:10px;align-items:center;font-weight:700;flex-wrap:wrap}
+.shvh{grid-column:1/-1;font-size:20px;margin-top:10px;display:flex;gap:8px;align-items:center}
+.hint{background:light-dark(#fff8e1,#2a2410);border:1px solid var(--y);border-radius:10px;padding:8px 12px;font-size:14px;margin:6px 0 0}
 .week button{min-width:48px;padding:6px 12px;background:var(--sky);color:#00296b;font-size:20px}
 .prog{height:8px;border-radius:4px;background:var(--line);overflow:hidden;margin-top:6px}
 .prog i{display:block;height:100%;background:var(--blue)}
@@ -203,7 +209,7 @@ dialog h2{margin-bottom:14px}
           <button type="button" data-role="shmini" aria-pressed="false">שמיניסט/ית<small>מעקב על הסניף שלי</small></button>
           <button type="button" data-role="rakaz" aria-pressed="false">רכז/ת<small>כמה סניפים</small></button>
         </div></div>
-      <div class="regOnly" id="oneSnif"><label for="lSnif">סניף</label><input id="lSnif" list="dlSnif" autocomplete="off"></div>
+      <div class="regOnly" id="oneSnif"><label for="lSnif">סניף</label><select id="lSnif"></select><p class="hint hid" id="noSnif">עדיין אין סניפים ברשימה. הרכז/ת צריך/ה להירשם קודם ולהוסיף את הסניפים, ואז הסניף שלך יופיע כאן.</p></div>
       <div class="regOnly hid" id="manySnif"><label for="lSnifAdd">הסניפים שאני מרכז/ת</label>
         <div class="addRow"><input id="lSnifAdd" list="dlSnif" autocomplete="off" placeholder="שם סניף"><button type="button" id="lSnifBtn">הוספה</button></div>
         <div class="chipEd" id="lSnifChips"></div></div>
@@ -227,6 +233,7 @@ dialog h2{margin-bottom:14px}
   <section id="vMine" class="hid">
     <div class="row"><h2 id="myTitle">החניכים שלי</h2><span class="sp"></span><button id="csvMine">הורדה ל-CSV</button><button class="pri" id="addBtn">+ הוספת חניך/ה</button></div>
     <div class="week" data-week></div>
+    <div id="myShevet"></div>
     <div id="myList" class="list" style="margin-top:14px"></div>
   </section>
 
@@ -255,6 +262,7 @@ dialog h2{margin-bottom:14px}
       <div style="flex:1 1 220px"><label for="q">חיפוש</label><input id="q" placeholder="שם חניך, מדריך, שבט…"></div>
       <div style="flex:0 1 190px"><label for="fSt">מצב השבוע</label>
         <select id="fSt"><option value="">הכול</option><option value="green">ירוק</option><option value="yellow">צהוב</option><option value="red">אדום</option><option value="none">לא עודכן</option></select></div>
+      <div style="flex:0 1 170px"><label for="fSh">שבט</label><select id="fSh"></select></div>
       <div style="flex:0 1 190px" id="fPrWrap"><label for="fPr">מסגרת</label>
         <select id="fPr"><option value="">הכול</option><option value="moadonit">מועדונית</option><option value="ach">אח גדול</option></select></div>
     </div>
@@ -278,7 +286,7 @@ dialog h2{margin-bottom:14px}
   <div class="grid">
     <div><label for="f_name">שם החניך/ה *</label><input id="f_name" required></div>
     <div id="prWrap" class="hid"><label for="f_program">מסגרת</label><select id="f_program"><option value="moadonit">מועדונית</option><option value="ach">אח גדול</option></select></div>
-    <div><label for="f_shevet">שבט</label><input id="f_shevet"></div>
+    <div><label for="f_shevet">שבט</label><select id="f_shevet"></select></div>
     <div><label for="f_phone">טלפון חניך</label><input id="f_phone" type="tel" dir="ltr"></div>
     <div><label for="f_parents">שם ההורים</label><input id="f_parents"></div>
     <div><label for="f_pphone">טלפון הורים</label><input id="f_pphone" type="tel" dir="ltr"></div>
@@ -365,6 +373,9 @@ let week=THIS;
 
 /* ---------- state ---------- */
 let db=null,cKids=null,cUsers=null,kids=[],users=[],usersReady=false,me=null,snifSel='',editId=null,pUser=null,authMode='login',regRole='madrich',regSnifs=[],edSnifs=[];
+const SHEVATIM=['רגבים','זרעים','נבטים','ניצנים','מעלות','הרא"ה','קדם'];
+const shvSort=(a,b)=>{const i=SHEVATIM.indexOf(a),j=SHEVATIM.indexOf(b);return (i<0?99:i)-(j<0?99:j)||heSort(a,b)};
+let snifNames=[],metaLoaded=false,backfilled=false,cMeta=null;
 const drafts={};let cResets=null,resets=[],mode='local',fb=null,fbUser=null,registering=false,unsubs=[],uOk=false;
 const FBV='10.14.1',loadScript=src=>new Promise((ok,no)=>{const t=document.createElement('script');t.src=src;t.onload=ok;t.onerror=no;document.head.appendChild(t)});
 const fbErr=x=>({'auth/email-already-in-use':'האימייל הזה כבר רשום – עברו ללשונית "כניסה"','auth/invalid-email':'כתובת אימייל לא תקינה','auth/weak-password':'הסיסמה חלשה מדי','auth/network-request-failed':'אין חיבור לאינטרנט','auth/too-many-requests':'יותר מדי ניסיונות. נסו שוב בעוד כמה דקות','auth/requires-recent-login':'מטעמי אבטחה צריך לצאת, להיכנס שוב ולנסות שוב'}[x&&x.code]||'משהו השתבש, נסו שוב');
@@ -433,7 +444,16 @@ function renderAuth(){
   $('lBtn').textContent=reg?'הרשמה וכניסה':fg?(mode==='firebase'?'שליחת מייל לאיפוס':'שליחת בקשה לאיפוס'):'כניסה';
   document.querySelector('p.forgotOnly').textContent=mode==='firebase'?'כתבו את האימייל שאיתו נרשמתם, ונשלח אליו קישור לבחירת סיסמה חדשה.':'כתבו את האימייל שאיתו נרשמתם. הבקשה תגיע לרכז/ת או לשמיניסט/ית של הסניף, והם יקבעו לכם סיסמה זמנית ויעבירו לכם אותה. בכניסה הבאה תתבקשו לבחור סיסמה חדשה.';
   $('lPass').autocomplete=reg?'new-password':'current-password';
-  $('dlSnif').innerHTML=allSnifs().map(v=>`<option value="${esc(v)}">`).join('');
+  const names=snifNames.slice().sort(heSort),cur=$('lSnif').value;
+  $('dlSnif').innerHTML=names.map(v=>`<option value="${esc(v)}">`).join('');
+  $('lSnif').innerHTML=names.length?'<option value="">בחרו סניף…</option>'+names.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join(''):'<option value="">אין עדיין סניפים</option>';
+  if(names.includes(cur))$('lSnif').value=cur;
+  $('lSnif').disabled=!names.length;$('noSnif').classList.toggle('hid',!!names.length||!reg||regRole==='rakaz');
+}
+async function publishSnifim(list){
+  if(!cMeta)return;
+  const names=[...new Set(list.map(norm).filter(Boolean))].sort(heSort);
+  try{await cMeta.doc('snifim').set({names,updated:new Date().toISOString()})}catch(e){toast('לא הצלחנו לעדכן את רשימת הסניפים')}
 }
 const setMode=m=>{authMode=m;$('lErr').textContent='';$('lOk').classList.add('hid');renderAuth()};
 $('tLogin').addEventListener('click',()=>setMode('login'));
@@ -461,7 +481,8 @@ $('loginF').addEventListener('submit',async e=>{
     if(regRole==='rakaz'&&norm($('lSnifAdd').value))chipAdd($('lSnifAdd'),$('lSnifChips'),regSnifs);
     const snifim=regRole==='rakaz'?regSnifs.slice():[norm($('lSnif').value)].filter(Boolean);
     if(!name)return err('מלאו שם מלא');
-    if(!snifim.length)return err(regRole==='rakaz'?'הוסיפו לפחות סניף אחד':'מלאו סניף');
+    if(!snifim.length)return err(regRole==='rakaz'?'הוסיפו לפחות סניף אחד':(snifNames.length?'בחרו סניף':'עדיין אין סניפים – הרכז/ת צריך/ה להירשם קודם'));
+    if(regRole!=='rakaz'&&!snifNames.includes(snifim[0]))return err('בחרו סניף מהרשימה');
     if(!okUser(u))return err('כתובת אימייל לא תקינה (אותיות באנגלית, ספרות, נקודה, מקף או +)');
     if(mode!=='firebase'&&userBy(u))return err('האימייל הזה כבר רשום – עברו ללשונית "כניסה"');
     if(!pwOk(p))return err('הסיסמה לא עומדת בכל הדרישות שברשימה');
@@ -469,6 +490,7 @@ $('loginF').addEventListener('submit',async e=>{
       registering=true;$('lBtn').disabled=true;
       try{const c=await fb.createUserWithEmailAndPassword(u,p);
         await cUsers.doc(u).set({username:u,email:u,uid:c.user.uid,name,role:regRole,snifim,created:new Date().toISOString()});
+        if(regRole==='rakaz')await publishSnifim([...snifNames,...snifim]);
         $('lPass').value='';location.hash=['rakaz','shmini'].includes(regRole)?'overview':'mine';}
       catch(x){err(fbErr(x))}
       finally{registering=false;$('lBtn').disabled=false;restore();renderAll()}
@@ -476,6 +498,7 @@ $('loginF').addEventListener('submit',async e=>{
     }
     const salt=newSalt(),h=await hash(salt,p),doc={username:u,email:u,name,role:regRole,snifim,salt,hash:h,created:new Date().toISOString()};
     try{await cUsers.doc(u).set(doc)}catch(x){return err('לא הצלחנו לשמור. ודאו שקיבלתם הרשאת Contributor לעמוד.')}
+    if(regRole==='rakaz')await publishSnifim([...snifNames,...snifim]);
     login(doc);return;
   }
   if(!u||!p)return err('מלאו אימייל וסיסמה');
@@ -533,13 +556,22 @@ function renderMine(){
   const nach=me.role==='nachshon';
   $('myTitle').textContent=`${nach?'החניכים שלי בנחשון':'החניכים שלי'} · ${me.name}`+(mySnifs()[0]?` · סניף ${mySnifs()[0]}`:'');
   const list=kids.filter(k=>k.madrich===me.username).sort((a,b)=>heSort(prog(a)+a.name,prog(b)+b.name)),done=list.filter(k=>entry(k,week)).length;
-  if(!list.length){$('myList').innerHTML=`<div class="empty">עוד אין חניכים ברשימה. לחצו "הוספת חניך/ה" כדי להתחיל.</div>`;return}
+  if(!list.length){$('myShevet').innerHTML='';$('myList').innerHTML=`<div class="empty">עוד אין חניכים ברשימה. לחצו "הוספת חניך/ה" כדי להתחיל.</div>`;return}
+  const byS={};list.forEach(k=>{const s=norm(k.shevet)||'ללא שבט';(byS[s]=byS[s]||[]).push(k)});
+  const shs=Object.keys(byS).sort(shvSort);
+  $('myShevet').innerHTML=`<h3 style="font-size:22px;margin:4px 0 8px">סיכום לפי שבט</h3><div class="shv-row">${shs.map(s=>{const g=byS[s],c=x=>g.filter(k=>statusAt(k,week)===x).length,es=g.map(k=>entry(k,week)).filter(Boolean);
+    return `<div class="shv"><b>${s==='ללא שבט'?s:'שבט '+esc(s)}</b><div><b class="n">${g.length}</b> חניכים</div>
+      <div class="dots"><span><span class="dot green"></span> ${c('green')}</span><span><span class="dot yellow"></span> ${c('yellow')}</span><span><span class="dot red"></span> ${c('red')}</span></div>
+      <div class="small">השבוע: הגיעו ${es.filter(e=>e.arrived==='yes').length} · עודכנו ${es.length}/${g.length}</div></div>`}).join('')}</div>`;
+  list.sort((a,b)=>shvSort(norm(a.shevet)||'ללא שבט',norm(b.shevet)||'ללא שבט')||heSort(a.name,b.name));
+  let lastS=null;
   const ae=document.activeElement,aid=ae&&ae.dataset&&ae.dataset.step?ae.dataset.step:null;
   $('myList').innerHTML=list.map(k=>{
+    const sh=norm(k.shevet)||'ללא שבט',head=shs.length>1&&sh!==lastS?`<h3 class="shvh">${sh==='ללא שבט'?sh:'שבט '+esc(sh)}<span class="small">(${byS[sh].length})</span></h3>`:'';lastS=sh;
     const e=entry(k,week),d=drafts[k._id+'|'+week]||{arrived:e?e.arrived:'',status:e?e.status:'',step:e?e.step:''};
     const prev=entry(k,addWeeks(week,-1)),st=d.status||statusAt(k,week);
     const ph=[k.phone&&('חניך '+k.phone),k.pphone&&('הורים '+k.pphone)].filter(Boolean).map(esc).join(' · ');
-    return `<article class="kid ${esc(st)} ${e?'done':''}" data-id="${esc(k._id)}">
+    return head+`<article class="kid ${esc(st)} ${e?'done':''}" data-id="${esc(k._id)}">
       <div class="row"><span class="av ${esc(st)}" aria-hidden="true">${esc(String(k.name||'?').trim().charAt(0))}</span><h3>${esc(k.name)}</h3>${isNach(k)?`<span class="prog-tag">${PROG[prog(k)]}</span>`:''}<span class="tag">עודכן ✓</span></div>
       <div class="m">${[k.shevet&&('שבט '+k.shevet),k.origin&&('עלו מ'+k.origin)].filter(Boolean).map(esc).join(' · ')}${ph?`<br><span dir="auto">${ph}</span>`:''}</div>
       ${prev&&prev.step?`<div class="prev"><b>בשבוע שעבר תכננו:</b> ${esc(prev.step)}</div>`:''}
@@ -605,14 +637,16 @@ function renderOver(){
   if(sn.length>1)per.unshift(snifCard('כל הסניפים שלי',kids.filter(k=>sn.includes(norm(k.snif))),true));
   $('scards').innerHTML=per.join('');
 }
-$('editSnifs').addEventListener('click',()=>{edSnifs=snifsOf(me,true).slice();chipEd($('oSnifChips'),edSnifs);$('dlSnif').innerHTML=allSnifs().map(v=>`<option value="${esc(v)}">`).join('');$('snifEd').classList.remove('hid');$('oSnifAdd').focus()});
+$('editSnifs').addEventListener('click',()=>{edSnifs=snifsOf(me,true).slice();chipEd($('oSnifChips'),edSnifs);$('dlSnif').innerHTML=[...new Set([...snifNames,...allSnifs()])].map(v=>`<option value="${esc(v)}">`).join('');$('snifEd').classList.remove('hid');$('oSnifAdd').focus()});
 $('oSnifBtn').addEventListener('click',()=>chipAdd($('oSnifAdd'),$('oSnifChips'),edSnifs));
 $('oSnifAdd').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();chipAdd($('oSnifAdd'),$('oSnifChips'),edSnifs)}});
 $('oSnifCancel').addEventListener('click',()=>$('snifEd').classList.add('hid'));
 $('oSnifSave').addEventListener('click',async()=>{
   if(norm($('oSnifAdd').value))chipAdd($('oSnifAdd'),$('oSnifChips'),edSnifs);
   if(!edSnifs.length){toast('צריך לפחות סניף אחד');return}
-  try{await cUsers.doc(me.username).update({snifim:edSnifs.slice(),role:'rakaz'});$('snifEd').classList.add('hid');toast('הסניפים עודכנו')}catch(e){toast('השמירה נכשלה')}
+  try{await cUsers.doc(me.username).update({snifim:edSnifs.slice(),role:'rakaz'});
+    await publishSnifim([...users.filter(u=>(u.role==='rakaz'||u.role==='admin')&&u.username!==me.username).flatMap(u=>snifsOf(u,true)),...edSnifs]);
+    $('snifEd').classList.add('hid');toast('הסניפים עודכנו')}catch(e){toast('השמירה נכשלה')}
 });
 
 /* ---------- rakaz: detail ---------- */
@@ -621,15 +655,16 @@ function scopeKids(){
   return kids.filter(k=>isNach(k)===nach&&(snifSel?norm(k.snif)===snifSel:sn.includes(norm(k.snif))));
 }
 function filtered(){
-  const q=norm($('q').value).toLowerCase(),fs=$('fSt').value,fp=$('fPr').value;
+  const q=norm($('q').value).toLowerCase(),fs=$('fSt').value,fp=$('fPr').value,fh=$('fSh').value;
   return scopeKids().filter(k=>{const e=entry(k,week);
-    return (!fs||(fs==='none'?!e:(e&&e.status===fs)))&&(!fp||cur!=='nachshon'||prog(k)===fp)&&(!q||[k.name,madName(k),k.shevet,k.parents,k.origin].join(' ').toLowerCase().includes(q))});
+    return (!fh||norm(k.shevet)===fh)&&(!fs||(fs==='none'?!e:(e&&e.status===fs)))&&(!fp||cur!=='nachshon'||prog(k)===fp)&&(!q||[k.name,madName(k),k.shevet,k.parents,k.origin].join(' ').toLowerCase().includes(q))});
 }
 function renderTrack(){
   if(!isMgr()||(cur!=='track'&&cur!=='nachshon'))return;
   const nach=cur==='nachshon',sn=mySnifs();
   if(snifSel&&!sn.includes(snifSel))snifSel='';
   $('fPrWrap').classList.toggle('hid',!nach);
+  {const v=$('fSh').value,ex=[...new Set(scopeKids().map(k=>norm(k.shevet)).filter(Boolean))];$('fSh').innerHTML='<option value="">הכול</option>'+[...new Set([...SHEVATIM,...ex])].sort(shvSort).map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');$('fSh').value=v}
   $('snifChips').innerHTML=sn.length>1?[['','כל הסניפים שלי'],...sn.map(s=>[s,s])].map(([v,t])=>`<button data-snif="${esc(v)}" aria-pressed="${v===snifSel}">${esc(t)}</button>`).join(''):'';
   $('rTitle').textContent=(nach?'מעקב נחשון':'מעקב מדריכים')+' · '+(snifSel||(sn.length===1?sn[0]:'כל הסניפים שלי'));
   const base=scopeKids(),es=base.map(k=>entry(k,week)).filter(Boolean),c=s=>es.filter(e=>e.status===s).length;
@@ -653,7 +688,7 @@ function renderTrack(){
       <td><button class="sm" data-edit="${esc(k._id)}">פרטים</button></td></tr>`}).join('')}
     </tbody></table></div></div>`}).join('');
 }
-['q','fSt','fPr'].forEach(id=>$(id).addEventListener('input',renderTrack));
+['q','fSt','fPr','fSh'].forEach(id=>$(id).addEventListener('input',renderTrack));
 /* ---------- CSV export ---------- */
 const CSVH=['שבוע','סניף','מסגרת','מדריך/נחשוניסט','שם החניך/ה','שבט','טלפון חניך','שם ההורים','טלפון הורים','כתובת','מאיפה עלו','שנת עלייה','הגיע/ה?','מצב','צעד לשבוע-שבועיים','עודכן ע"י'];
 const csvQ=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
@@ -711,6 +746,7 @@ $('pFrm').addEventListener('submit',async e=>{
 function openForm(id){
   editId=id||null;const k=id?kids.find(x=>x._id===id):{};
   $('dlgT').textContent=id?`פרטים: ${k.name||''}`:'חניך/ה חדש/ה';
+  const sv=k.shevet||'';$('f_shevet').innerHTML='<option value="">בחרו שבט…</option>'+[...SHEVATIM,...(sv&&!SHEVATIM.includes(sv)?[sv]:[])].map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');
   FIELDS.forEach(f=>$('f_'+f).value=k[f]||'');
   const nach=id?isNach(k):me.role==='nachshon';
   $('prWrap').classList.toggle('hid',!nach);$('f_program').value=id&&isNach(k)?prog(k):'moadonit';
@@ -808,13 +844,18 @@ function startSubs(){
   unsubs.push(cUsers.onSnapshot(snap=>{
     users=snap.docs.map(d=>Object.assign({},d.data(),{username:d.id}));
     if(fresh(snap)){uOk=true;usersReady=true;ready()}else if(users.length)usersReady=true;
-    restore();renderAll();
+    restore();maybeBackfill();renderAll();
   },fail));
   unsubs.push(cKids.onSnapshot(snap=>{
     kids=snap.docs.map(d=>Object.assign({_id:d.id},d.data()));
     if(fresh(snap)){kOk=true;ready()}
     renderAll();
   },fail));
+}
+function maybeBackfill(){
+  if(backfilled||!metaLoaded||!me||!(me.role==='rakaz'||me.role==='admin'))return;
+  const mine=snifsOf(me,true);if(!mine.some(s=>!snifNames.includes(s)))return;
+  backfilled=true;publishSnifim([...snifNames,...mine]);
 }
 function stopSubs(){unsubs.forEach(f=>{try{f()}catch(e){}});unsubs=[]}
 renderAuth();note('טוען…');
@@ -827,7 +868,8 @@ renderAuth();note('טוען…');
   }else if(standalone){db=localDb();mode='local';note(LOCAL_MSG)}
   else{mode='claude';try{db=await claude.use('db')}catch(e){db=null}}
   if(!db){note('אי אפשר להתחבר למאגר הנתונים בתצוגה הזו. פתחו את העמוד כשאתם מחוברים ל-Claude.');return}
-  cKids=db.collection('chanichim');cUsers=db.collection('users');cResets=db.collection('resets');
+  cKids=db.collection('chanichim');cUsers=db.collection('users');cResets=db.collection('resets');cMeta=db.collection('meta');
+  cMeta.onSnapshot(snap=>{const d=snap.docs.find(x=>x.id==='snifim');snifNames=d?((d.data()||{}).names||[]):[];metaLoaded=true;renderAuth();maybeBackfill();if(me)renderAll()},()=>{metaLoaded=true;renderAuth()});
   if(mode==='firebase'){
     usersReady=true;note('');renderAll();
     fb.onAuthStateChanged(u=>{fbUser=u;

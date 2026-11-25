@@ -20,6 +20,12 @@ service cloud.firestore {
       allow delete: if isMgr() && email != myEmail();
     }
 
+    // רשימת הסניפים (הרכזות מגדירות אותה). כולם יכולים לקרוא, כדי לבחור סניף בהרשמה
+    match /meta/{doc} {
+      allow read: if true;
+      allow write: if isMgr();
+    }
+
     // חניכים: מדריך יוצר ומעדכן את החניכים שלו, רכז/שמיניסט יכולים לעדכן את כולם
     match /chanichim/{id} {
       allow read: if signedIn();
