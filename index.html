@@ -13,11 +13,11 @@
    PICTURE: big sky / leaf / navy tiles with huge headlines and live numbers, above the working cards and tables
    COLOUR and TYPE: navy #00296b, sky #55b0ff, leaf green #4ab12e, action blue #006bf6 on near-white; Rubik 800 headlines
    LAYOUT: navy top bar with logo and tabs, a bento hero per view, then the list – stacks to one column on phones */
-:root{color-scheme:light dark;
---bg:light-dark(#f4f7fb,#06142b);--card:light-dark(#fff,#0c2142);--ink:light-dark(#00296b,#e6eeff);--mut:light-dark(#5b6b8c,#9fb2d6);
---line:light-dark(#e1e7f0,#1d3560);--blue:light-dark(#006bf6,#55b0ff);--blueD:#00296b;--soft:light-dark(#eaf3ff,#12305e);--sky:#55b0ff;--leaf:#4ab12e;
+:root{color-scheme:light;
+--bg:#f4f7fb;--card:#fff;--ink:#00296b;--mut:#5b6b8c;
+--line:#e1e7f0;--blue:#006bf6;--blueD:#00296b;--soft:#eaf3ff;--sky:#55b0ff;--leaf:#4ab12e;
 --g:#3fa526;--y:#f2b705;--r:#e5383b;--sh:0 6px 20px rgba(0,41,107,.08)}
-:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+:root[data-theme]{color-scheme:light}
 *{box-sizing:border-box;min-width:0}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Rubik,system-ui,sans-serif;overflow-x:clip}
 h1,h2,h3{font-family:Rubik,sans-serif;font-weight:800;color:var(--ink);margin:0;line-height:1.1;text-wrap:balance}
@@ -81,14 +81,14 @@ button.sm{padding:5px 12px;min-height:36px;font-size:14px}
 .eye{position:absolute;left:4px;top:50%;transform:translateY(-50%);min-height:38px;width:44px;padding:0;background:transparent;display:grid;place-items:center;color:var(--mut)}
 .eye svg{width:22px;height:22px}.eye[aria-pressed=false] .slash{display:none}.eye[aria-pressed=true]{color:var(--blue)}
 .err{color:var(--r);font-weight:600;min-height:1.4em}
-.okmsg{background:light-dark(#e8f7ee,#0f2e1f);color:light-dark(#145c33,#9be0b5);border-radius:10px;padding:10px 14px;font-weight:600}
+.okmsg{background:#e8f7ee;color:#145c33;border-radius:10px;padding:10px 14px;font-weight:600}
 .pwr{list-style:none;margin:8px 0 0;padding:10px 12px;background:var(--soft);border-radius:10px;display:grid;gap:4px;font-size:14px}
 .pwr li{display:flex;gap:8px;align-items:center;color:var(--mut)}
 .pwr li::before{content:'○';width:1em;text-align:center;font-weight:700}
-.pwr li.ok{color:light-dark(#157a40,#6fd69b)}.pwr li.ok::before{content:'✓'}
+.pwr li.ok{color:#157a40}.pwr li.ok::before{content:'✓'}
 .pwr b{color:var(--ink)}
 .link{background:none;border:0;color:var(--blue);text-decoration:underline;text-underline-offset:3px;padding:6px;min-height:36px;font-weight:600;justify-self:center}
-.req{border:2px solid var(--y);background:light-dark(#fff8e1,#2a2410);margin:12px 0}
+.req{border:2px solid var(--y);background:#fff8e1;margin:12px 0}
 .req ul{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:8px}
 .req li{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .week{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px;margin:14px 0;box-shadow:var(--sh)}
@@ -98,7 +98,7 @@ button.sm{padding:5px 12px;min-height:36px;font-size:14px}
 .shv b.n{font-size:30px;font-weight:800;line-height:1}
 .shv .dots{display:flex;gap:10px;align-items:center;font-weight:700;flex-wrap:wrap}
 .shvh{grid-column:1/-1;font-size:20px;margin-top:10px;display:flex;gap:8px;align-items:center}
-.hint{background:light-dark(#fff8e1,#2a2410);border:1px solid var(--y);border-radius:10px;padding:8px 12px;font-size:14px;margin:6px 0 0}
+.hint{background:#fff8e1;border:1px solid var(--y);border-radius:10px;padding:8px 12px;font-size:14px;margin:6px 0 0}
 .week button{min-width:48px;padding:6px 12px;background:var(--sky);color:#00296b;font-size:20px}
 .prog{height:8px;border-radius:4px;background:var(--line);overflow:hidden;margin-top:6px}
 .prog i{display:block;height:100%;background:var(--blue)}
@@ -130,7 +130,7 @@ button.sm{padding:5px 12px;min-height:36px;font-size:14px}
 .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .chips button{border-radius:999px;background:var(--card);border:1px solid var(--line);font-weight:600}
 .chips button[aria-pressed=true]{background:var(--blue);color:#fff;border-color:var(--blue)}
-.miss{border-color:var(--y);background:light-dark(#fff8e1,#2a2410)}
+.miss{border-color:var(--y);background:#fff8e1}
 .miss ul{margin:6px 0 0;padding-inline-start:20px}
 .grp{margin-top:22px}
 .grp h3{font-size:20px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
@@ -181,6 +181,21 @@ dialog h2{margin-bottom:14px}
 .total .leg span.t{color:#00296b}.total .sub{border-color:rgba(0,41,107,.2)}
 .total .sbar{background:rgba(255,255,255,.5)}
 .prog-tag{display:inline-block;border-radius:999px;padding:1px 10px;font-size:13px;font-weight:700;background:var(--soft);color:var(--blue)}
+:root{--bg:#f7faff;--line:#e3ebf6;--soft:#edf5ff;--sh:0 4px 16px rgba(0,60,150,.07)}
+header.top{background:#fff;color:var(--ink);box-shadow:0 1px 0 var(--line),0 4px 14px rgba(0,60,150,.06)}
+.brand{color:var(--ink)}.brand img{box-shadow:0 0 0 1px var(--line)}.brand span{color:var(--mut);opacity:1}
+.tabs a{color:var(--ink);opacity:.8}.tabs a:hover{background:var(--soft);opacity:1}
+.tabs a[aria-current=page]{background:#006bf6;color:#fff;opacity:1}
+#meName{color:var(--ink);text-decoration-color:var(--line)}
+#meAcct{background:var(--soft)!important;color:var(--ink)}
+.pill{background:var(--sky);color:#fff}
+.tile.sun{background:#ffc93c;color:#5a3d00}.tile.sun h3{color:#5a3d00}
+.tile.coral{background:#ff7a7a}
+.tile.sky h2{text-shadow:none}
+.schead{background:var(--soft);color:var(--ink);border-bottom:1px solid var(--line)}.schead h3{color:var(--ink)}.schead .small{color:var(--mut)}
+.total{background:#e3f1ff;color:var(--ink)}.total .schead{background:var(--sky);border:0}.total .schead h3,.total .schead .small{color:#fff}
+.total .sbar{background:#fff}.total .leg span.t{color:var(--mut)}
+.week button{color:#fff}
 @media(prefers-reduced-motion:reduce){.toast,.kid{transition:none}.kid:hover{transform:none}}
 @media(max-width:900px){.bento{grid-template-columns:1fr 1fr}.bento .tile:first-child{grid-column:1/-1}.lgrid{grid-template-columns:1fr}.lgrid .ltiles{order:-1}}
 @media(max-width:600px){.ltiles .tile.sky .deco{display:none}.ltiles .tile.sky h2,.ltiles .tile.sky p{max-width:none}.tile{min-height:120px;padding:18px}.ltiles .tile.sky{min-height:220px}.ltiles .tile:not(.sky){display:none}.me #meName{display:none}.brand span{display:none}}
@@ -231,8 +246,8 @@ dialog h2{margin-bottom:14px}
     </form>
     <div class="ltiles">
       <div class="tile sky"><svg class="deco" viewBox="0 0 600 330" preserveAspectRatio="xMinYMax slice" aria-hidden="true"><defs><path id="st" d="M0-14C2-4 4-2 14 0 4 2 2 4 0 14-2 4-4 2-14 0-4-2-2-4 0-14Z"/></defs><g fill="#fff"><use href="#st" transform="translate(70 60) scale(1.2)" opacity=".9"/><use href="#st" transform="translate(150 40) scale(.6)" opacity=".7"/><use href="#st" transform="translate(40 150) scale(.7)" opacity=".6"/></g><g transform="translate(-30 330)"><circle cx="90" cy="-150" r="26" fill="#00296b"/><rect x="58" y="-118" width="64" height="118" rx="30" fill="#00296b"/><circle cx="160" cy="-178" r="30" fill="#fff"/><rect x="122" y="-142" width="76" height="142" rx="36" fill="#fff"/><circle cx="232" cy="-140" r="24" fill="#4ab12e"/><rect x="202" y="-110" width="60" height="110" rx="28" fill="#4ab12e"/><path d="M120-96q40 30 80 0" stroke="#55b0ff" stroke-width="8" fill="none" stroke-linecap="round"/></g></svg><h2>החבר׳ה שלנו<br>בעמישב</h2><p>מקום אחד מסודר לראות כל חניך, לתת גב לצוותים ולוודא שאף אחד לא נשאר מאחור</p></div>
-      <div class="tile leaf"><h3>מעקב שבועי</h3><p>מי הגיע, איך משתלב/ת ומה הצעד הבא – בכמה לחיצות</p><span class="arr">←</span></div>
-      <div class="tile navy"><h3>מדריכים ונחשון</h3><p>חניכי הסניף, מועדונית ואח גדול – הכול תחת אותו סניף</p><span class="arr">←</span></div>
+      <div class="tile leaf"><h3>מעקב שבועי</h3><p>מי הגיע, איך משתלב/ת ומה הצעד הבא – בכמה לחיצות</p></div>
+      <div class="tile sun"><h3>מדריכים ונחשון</h3><p>חניכי הסניף, מועדונית ואח גדול – הכול תחת אותו סניף</p></div>
     </div>
   </div></section>
 
@@ -953,7 +968,7 @@ function renderHero(){
       <div><h2>שלום, ${esc(first)}!</h2><p style="margin-top:6px">${esc(sub)}</p></div>
       <div><div class="lbl">עודכנו ${upd} מתוך ${list.length} לשבוע ${esc(weekLabel(week))}</div><div class="barw" style="margin-top:6px"><i style="width:${pc}%"></i></div></div></div>
     <div class="tile leaf"><span class="lbl">${mgr?'הגיעו השבוע':'הגיעו השבוע מהחניכים שלי'}</span><span class="num">${came}</span><span>מתוך ${list.length} חניכים</span></div>
-    <div class="tile navy"><span class="lbl">צריכים תשומת לב</span><span class="num">${red}</span><span>חניכים במצב אדום</span></div>`;
+    <div class="tile coral"><span class="lbl">צריכים תשומת לב</span><span class="num">${red}</span><span>חניכים במצב אדום</span></div>`;
 }
 
 function renderAll(){
