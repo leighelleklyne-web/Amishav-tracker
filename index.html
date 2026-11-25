@@ -918,7 +918,7 @@ $('meName').addEventListener('click',()=>{
   if(!me)return;
   $('acInfo').textContent=`${me.name} · ${me.username} · ${ROLE[me.role]||''}${mySnifs().length?' · '+mySnifs().join(', '):''}`;
   const pwAcct=mode!=='firebase'||(fb.currentUser&&fb.currentUser.providerData.some(p=>p.providerId==='password'));
-  $('acPw').classList.toggle('hid',!pwAcct);$('acPassWrap').classList.toggle('hid',mode!=='firebase'||!pwAcct);$('acGTxt').classList.toggle('hid',mode!=='firebase'||pwAcct);$('acPass').value='';$('acErr').textContent='';$('acKids').checked=false;
+  $('acPw').classList.toggle('hid',!pwAcct);$('acPassWrap').classList.toggle('hid',mode!=='firebase'||!pwAcct);$('acGTxt').classList.toggle('hid',mode!=='firebase'||pwAcct);$('acPass').value='';$('acErr').textContent='';$('acKids').checked=true;
   $('acDel').dataset.sure='';$('acDel').textContent='מחיקת החשבון שלי';$('acDlg').showModal();
 });
 $('acPw').addEventListener('click',()=>{$('acDlg').close();openPw(me.username,false)});
