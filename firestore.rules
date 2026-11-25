@@ -1,0 +1,30 @@
+rules_version = '2';
+// כללי אבטחה למסד הנתונים של עמישב.
+// להדביק ב-Firebase: Firestore Database → Rules → Publish
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function myEmail() { return request.auth.token.email.lower(); }
+    function myProfile() { return get(/databases/$(database)/documents/users/$(myEmail())).data; }
+    function isMgr() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/users/$(myEmail()))
+        && myProfile().role in ['rakaz', 'shmini', 'admin'];
+    }
+
+    // פרופילים של אנשי הצוות (המזהה הוא האימייל)
+    match /users/{email} {
+      allow read: if signedIn();
+      allow create: if signedIn() && email == myEmail() && request.resource.data.email == email;
+      allow update: if signedIn() && (email == myEmail() || isMgr());
+      allow delete: if isMgr() && email != myEmail();
+    }
+
+    // חניכים: מדריך יוצר ומעדכן את החניכים שלו, רכז/שמיניסט יכולים לעדכן את כולם
+    match /chanichim/{id} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.madrich == myEmail();
+      allow update, delete: if signedIn() && (resource.data.madrich == myEmail() || isMgr());
+    }
+  }
+}

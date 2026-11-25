@@ -176,6 +176,7 @@ dialog h2{margin-bottom:14px}
 @media(max-width:600px){.ltiles .tile.sky .deco{display:none}.ltiles .tile.sky h2,.ltiles .tile.sky p{max-width:none}.tile{min-height:120px;padding:18px}.ltiles .tile.sky{min-height:220px}.ltiles .tile:not(.sky){display:none}.me #meName{display:none}.brand span{display:none}}
 @media(max-width:600px){table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-block:10px;border-bottom:1px solid var(--line)}.stack td{display:flow-root;border:0;padding:3px 10px;padding-inline-start:8em;text-align:start}.stack td::before{content:attr(data-l);float:inline-start;width:7.5em;margin-inline-start:-8em;white-space:normal;color:var(--mut)}.stack td:empty{display:none}}
 </style>
+<script src="firebase-config.js"></script>
 <script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script>
 </head>
 <body>
@@ -364,7 +365,9 @@ let week=THIS;
 
 /* ---------- state ---------- */
 let db=null,cKids=null,cUsers=null,kids=[],users=[],usersReady=false,me=null,snifSel='',editId=null,pUser=null,authMode='login',regRole='madrich',regSnifs=[],edSnifs=[];
-const drafts={};let cResets=null,resets=[];
+const drafts={};let cResets=null,resets=[],mode='local',fb=null,fbUser=null,registering=false,unsubs=[],uOk=false;
+const FBV='10.14.1',loadScript=src=>new Promise((ok,no)=>{const t=document.createElement('script');t.src=src;t.onload=ok;t.onerror=no;document.head.appendChild(t)});
+const fbErr=x=>({'auth/email-already-in-use':'האימייל הזה כבר רשום – עברו ללשונית "כניסה"','auth/invalid-email':'כתובת אימייל לא תקינה','auth/weak-password':'הסיסמה חלשה מדי','auth/network-request-failed':'אין חיבור לאינטרנט','auth/too-many-requests':'יותר מדי ניסיונות. נסו שוב בעוד כמה דקות','auth/requires-recent-login':'מטעמי אבטחה צריך לצאת, להיכנס שוב ולנסות שוב'}[x&&x.code]||'משהו השתבש, נסו שוב');
 function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),2400)}
 function note(t){$('note').textContent=t||''}
 const entry=(k,w)=>(k.log&&k.log[w])||null;
@@ -427,7 +430,8 @@ function renderAuth(){
   document.querySelectorAll('.regOnly').forEach(e=>e.classList.toggle('hid',!reg));
   if(reg){$('oneSnif').classList.toggle('hid',regRole==='rakaz');$('manySnif').classList.toggle('hid',regRole!=='rakaz')}
   document.querySelectorAll('[data-role]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.role===regRole));
-  $('lBtn').textContent=reg?'הרשמה וכניסה':fg?'שליחת בקשה לאיפוס':'כניסה';
+  $('lBtn').textContent=reg?'הרשמה וכניסה':fg?(mode==='firebase'?'שליחת מייל לאיפוס':'שליחת בקשה לאיפוס'):'כניסה';
+  document.querySelector('p.forgotOnly').textContent=mode==='firebase'?'כתבו את האימייל שאיתו נרשמתם, ונשלח אליו קישור לבחירת סיסמה חדשה.':'כתבו את האימייל שאיתו נרשמתם. הבקשה תגיע לרכז/ת או לשמיניסט/ית של הסניף, והם יקבעו לכם סיסמה זמנית ויעבירו לכם אותה. בכניסה הבאה תתבקשו לבחור סיסמה חדשה.';
   $('lPass').autocomplete=reg?'new-password':'current-password';
   $('dlSnif').innerHTML=allSnifs().map(v=>`<option value="${esc(v)}">`).join('');
 }
@@ -444,6 +448,10 @@ $('loginF').addEventListener('submit',async e=>{
   if(!cUsers){err('אין חיבור לנתונים כרגע');return}
   if(authMode==='forgot'){
     if(!okUser(u))return err('כתבו כתובת אימייל תקינה');
+    if(mode==='firebase'){
+      try{await fb.sendPasswordResetEmail(u)}catch(x){if(x&&x.code!=='auth/user-not-found')return err(fbErr(x))}
+      $('lOk').textContent='אם האימייל רשום, שלחנו אליו מייל עם קישור לבחירת סיסמה חדשה. בדקו גם בתיקיית הספאם.';$('lOk').classList.remove('hid');return;
+    }
     const usr=userBy(u);
     if(usr){try{await cResets.doc(u).set({email:u,name:usr.name||'',snifim:snifsOf(usr,true),at:new Date().toISOString()})}catch(x){return err('השליחה נכשלה, נסו שוב')}}
     $('lOk').textContent='אם האימייל רשום, הבקשה הועברה לרכז/ת של הסניף. אפשר גם לפנות אליהם ישירות.';$('lOk').classList.remove('hid');return;
@@ -455,13 +463,29 @@ $('loginF').addEventListener('submit',async e=>{
     if(!name)return err('מלאו שם מלא');
     if(!snifim.length)return err(regRole==='rakaz'?'הוסיפו לפחות סניף אחד':'מלאו סניף');
     if(!okUser(u))return err('כתובת אימייל לא תקינה (אותיות באנגלית, ספרות, נקודה, מקף או +)');
-    if(userBy(u))return err('האימייל הזה כבר רשום – עברו ללשונית "כניסה"');
+    if(mode!=='firebase'&&userBy(u))return err('האימייל הזה כבר רשום – עברו ללשונית "כניסה"');
     if(!pwOk(p))return err('הסיסמה לא עומדת בכל הדרישות שברשימה');
+    if(mode==='firebase'){
+      registering=true;$('lBtn').disabled=true;
+      try{const c=await fb.createUserWithEmailAndPassword(u,p);
+        await cUsers.doc(u).set({username:u,email:u,uid:c.user.uid,name,role:regRole,snifim,created:new Date().toISOString()});
+        $('lPass').value='';location.hash=['rakaz','shmini'].includes(regRole)?'overview':'mine';}
+      catch(x){err(fbErr(x))}
+      finally{registering=false;$('lBtn').disabled=false;restore();renderAll()}
+      return;
+    }
     const salt=newSalt(),h=await hash(salt,p),doc={username:u,email:u,name,role:regRole,snifim,salt,hash:h,created:new Date().toISOString()};
     try{await cUsers.doc(u).set(doc)}catch(x){return err('לא הצלחנו לשמור. ודאו שקיבלתם הרשאת Contributor לעמוד.')}
     login(doc);return;
   }
   if(!u||!p)return err('מלאו אימייל וסיסמה');
+  if(mode==='firebase'){
+    $('lBtn').disabled=true;
+    try{await fb.signInWithEmailAndPassword(u,p);$('lPass').value='';location.hash=''}
+    catch(x){err(x&&['auth/too-many-requests','auth/network-request-failed'].includes(x.code)?fbErr(x):'אימייל או סיסמה שגויים')}
+    finally{$('lBtn').disabled=false}
+    return;
+  }
   const usr=userBy(u);
   if(!usr||await hash(usr.salt,p)!==usr.hash)return err('אימייל או סיסמה שגויים');
   login(usr);
@@ -479,8 +503,13 @@ function openPw(u,forced){
   $('pDlg').showModal();$('pNew').focus();
 }
 $('pDlg').addEventListener('cancel',e=>{if($('pCancel').classList.contains('hid'))e.preventDefault()});
-$('logout').addEventListener('click',()=>{if($('pDlg').open)$('pDlg').close();me=null;store.del('am_sess');location.hash='';snifSel='';regSnifs.length=0;chipEd($('lSnifChips'),regSnifs);['lName','lSnif','lUser','lPass'].forEach(id=>$(id).value='');authMode='login';$('lErr').textContent='';renderAll()});
+$('logout').addEventListener('click',()=>{if($('pDlg').open)$('pDlg').close();if(fb)fb.signOut();me=null;store.del('am_sess');location.hash='';snifSel='';regSnifs.length=0;chipEd($('lSnifChips'),regSnifs);['lName','lSnif','lUser','lPass'].forEach(id=>$(id).value='');authMode='login';$('lErr').textContent='';renderAll()});
 function restore(){
+  if(mode==='firebase'){
+    me=fbUser?(userBy(String(fbUser.email||'').toLowerCase())||null):null;
+    if(fbUser&&!me&&uOk&&!registering){fb.signOut();$('lErr').textContent='החשבון הזה הוסר מהמערכת. פנו לרכז/ת.'}
+    return;
+  }
   if(me){const u=userBy(me.username);if(!u||u.hash!==me.hash){me=null;store.del('am_sess');toast('החשבון השתנה – היכנסו שוב')}else me=u;return}
   let s=null;try{s=JSON.parse(store.get('am_sess')||'null')}catch(e){}
   if(s){const u=userBy(s.u);if(u&&u.hash===s.h){me=u;if(u.mustChange)setTimeout(()=>{if(!$('pDlg').open)openPw(u.username,true)})}else store.del('am_sess')}
@@ -535,7 +564,8 @@ $('myList').addEventListener('click',async ev=>{
   if(s){const id=s.dataset.save,d=draftOf(id);
     if(!d.arrived&&!d.status&&!norm(d.step)){toast('סמנו לפחות דבר אחד');return}
     s.disabled=true;
-    try{await cKids.doc(id).update({log:{[week]:{arrived:d.arrived,status:d.status,step:norm(d.step),by:me.username,at:new Date().toISOString()}}});
+    const ent={arrived:d.arrived,status:d.status,step:norm(d.step),by:me.username,at:new Date().toISOString()};
+    try{await (mode==='firebase'?cKids.doc(id).update(new firebase.firestore.FieldPath('log',week),ent):cKids.doc(id).update({log:{[week]:ent}}));
       delete drafts[id+'|'+week];toast('נשמר ✓')}
     catch(e){toast('השמירה נכשלה, נסו שוב');s.disabled=false}}
 });
@@ -655,10 +685,13 @@ function renderUsers(){
     .sort((a,b)=>heSort(snifsOf(a).join()+a.role+a.name,snifsOf(b).join()+b.role+b.name));
   $('uBody').innerHTML=list.map(u=>{const n=kids.filter(k=>k.madrich===u.username).length,self=u.username===me.username;
     return `<tr><td><b>${esc(u.name)}</b></td><td><span dir="ltr">${esc(u.username)}</span></td><td>${esc(ROLE[u.role]||u.role)}</td><td>${esc(snifsOf(u,true).join(', '))}</td><td>${n||''}</td>
-    <td><button class="sm" data-pw="${esc(u.username)}">${self?'שינוי הסיסמה שלי':'איפוס סיסמה'}</button>${self||u.role==='rakaz'?'':` <button class="sm del" data-udel="${esc(u.username)}">מחיקה</button>`}</td></tr>`}).join('');
+    <td><button class="sm" data-pw="${esc(u.username)}">${self?'שינוי הסיסמה שלי':mode==='firebase'?'שליחת מייל איפוס':'איפוס סיסמה'}</button>${self||u.role==='rakaz'?'':` <button class="sm del" data-udel="${esc(u.username)}">מחיקה</button>`}</td></tr>`}).join('');
 }
 $('vUsers').addEventListener('click',async e=>{
-  const pw=e.target.closest('[data-pw]');if(pw){openPw(pw.dataset.pw,false);return}
+  const pw=e.target.closest('[data-pw]');
+  if(pw){const u=pw.dataset.pw;
+    if(mode==='firebase'&&u!==me.username){try{await fb.sendPasswordResetEmail(u);toast('נשלח מייל לאיפוס סיסמה ל'+((userBy(u)||{}).name||u))}catch(x){toast(fbErr(x))}return}
+    openPw(u,false);return}
   const rd=e.target.closest('[data-rdel]');if(rd){try{await cResets.doc(rd.dataset.rdel).delete()}catch(x){toast('הפעולה נכשלה')}return}
   const d=e.target.closest('[data-udel]');
   if(d){if(d.dataset.sure!=='1'){d.dataset.sure='1';d.textContent='בטוח?';return}
@@ -666,6 +699,7 @@ $('vUsers').addEventListener('click',async e=>{
 });
 $('pFrm').addEventListener('submit',async e=>{
   e.preventDefault();const p=$('pNew').value;if(!pwOk(p)){$('pErr').textContent='הסיסמה לא עומדת בכל הדרישות שברשימה';return}
+  if(mode==='firebase'){try{await fb.currentUser.updatePassword(p);$('pDlg').close();toast('הסיסמה עודכנה')}catch(x){$('pErr').textContent=fbErr(x)}return}
   const salt=newSalt(),h=await hash(salt,p),self=pUser===me.username;
   try{await cUsers.doc(pUser).update({salt,hash:h,mustChange:!self});
     if(self){me=Object.assign({},me,{hash:h,mustChange:false});store.set('am_sess',JSON.stringify({u:me.username,h}))}
@@ -764,27 +798,43 @@ function localDb(){
 }
 
 /* ---------- data ---------- */
-renderAuth();note('טוען…');
-(async()=>{
-  const standalone=typeof window.claude==='undefined';
-  if(standalone){db=localDb();note(LOCAL_MSG)}
-  else{try{db=await claude.use('db')}catch(e){db=null}}
-  if(!db){note('אי אפשר להתחבר למאגר הנתונים בתצוגה הזו. פתחו את העמוד כשאתם מחוברים ל-Claude.');return}
-  cKids=db.collection('chanichim');cUsers=db.collection('users');cResets=db.collection('resets');
-  cResets.onSnapshot(snap=>{resets=snap.docs.map(d=>Object.assign({},d.data(),{email:d.id}));if(me)renderAll()},()=>{});
-  let kOk=false,uOk=false;
+function startSubs(){
+  stopSubs();uOk=false;let kOk=false;
   const timer=setTimeout(()=>note('הנתונים עדיין לא זמינים – מנסה להתחבר…'),10000);
-  const ready=()=>{if(kOk&&uOk){clearTimeout(timer);note(standalone?LOCAL_MSG:'')}};
-  cUsers.onSnapshot(snap=>{
+  const ready=()=>{if(kOk&&uOk){clearTimeout(timer);note(mode==='local'?LOCAL_MSG:'')}};
+  const fail=x=>{clearTimeout(timer);note(x&&x.code==='permission-denied'?'אין הרשאה לקרוא את הנתונים. ודאו שכללי האבטחה ב-Firebase הוגדרו.':'החיבור לנתונים נותק. רעננו את העמוד מאוחר יותר.')};
+  if(mode!=='firebase')unsubs.push(cResets.onSnapshot(snap=>{resets=snap.docs.map(d=>Object.assign({},d.data(),{email:d.id}));if(me)renderAll()},()=>{}));
+  unsubs.push(cUsers.onSnapshot(snap=>{
     users=snap.docs.map(d=>Object.assign({},d.data(),{username:d.id}));
     if(!snap.metadata.fromCache){uOk=true;usersReady=true;ready()}else if(users.length)usersReady=true;
     restore();renderAll();
-  },()=>{clearTimeout(timer);note('החיבור לנתונים נותק. רעננו את העמוד מאוחר יותר.')});
-  cKids.onSnapshot(snap=>{
+  },fail));
+  unsubs.push(cKids.onSnapshot(snap=>{
     kids=snap.docs.map(d=>Object.assign({_id:d.id},d.data()));
     if(!snap.metadata.fromCache){kOk=true;ready()}
     renderAll();
-  },()=>{clearTimeout(timer);note('החיבור לנתונים נותק. רעננו את העמוד מאוחר יותר.')});
+  },fail));
+}
+function stopSubs(){unsubs.forEach(f=>{try{f()}catch(e){}});unsubs=[]}
+renderAuth();note('טוען…');
+(async()=>{
+  const standalone=typeof window.claude==='undefined',cfg=window.FIREBASE_CONFIG;
+  if(standalone&&cfg&&cfg.apiKey){
+    try{const b=`https://cdn.jsdelivr.net/npm/firebase@${FBV}/`;await loadScript(b+'firebase-app-compat.js');await loadScript(b+'firebase-auth-compat.js');await loadScript(b+'firebase-firestore-compat.js');
+      firebase.initializeApp(cfg);db=firebase.firestore();fb=firebase.auth();fb.languageCode='he';mode='firebase'}
+    catch(e){note('לא הצלחנו להתחבר ל-Firebase. בדקו את החיבור לאינטרנט ורעננו את העמוד.');return}
+  }else if(standalone){db=localDb();mode='local';note(LOCAL_MSG)}
+  else{mode='claude';try{db=await claude.use('db')}catch(e){db=null}}
+  if(!db){note('אי אפשר להתחבר למאגר הנתונים בתצוגה הזו. פתחו את העמוד כשאתם מחוברים ל-Claude.');return}
+  cKids=db.collection('chanichim');cUsers=db.collection('users');cResets=db.collection('resets');
+  if(mode==='firebase'){
+    usersReady=true;note('');renderAll();
+    fb.onAuthStateChanged(u=>{fbUser=u;
+      if(u){note('טוען…');startSubs()}
+      else{stopSubs();users=[];kids=[];me=null;uOk=false;note('');renderAll()}});
+    return;
+  }
+  startSubs();
 })();
 }
 </script>
