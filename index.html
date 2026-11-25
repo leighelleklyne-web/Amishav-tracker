@@ -798,6 +798,7 @@ function localDb(){
 }
 
 /* ---------- data ---------- */
+const fresh=snap=>mode==='firebase'||!snap.metadata.fromCache;
 function startSubs(){
   stopSubs();uOk=false;let kOk=false;
   const timer=setTimeout(()=>note('הנתונים עדיין לא זמינים – מנסה להתחבר…'),10000);
@@ -806,12 +807,12 @@ function startSubs(){
   if(mode!=='firebase')unsubs.push(cResets.onSnapshot(snap=>{resets=snap.docs.map(d=>Object.assign({},d.data(),{email:d.id}));if(me)renderAll()},()=>{}));
   unsubs.push(cUsers.onSnapshot(snap=>{
     users=snap.docs.map(d=>Object.assign({},d.data(),{username:d.id}));
-    if(!snap.metadata.fromCache){uOk=true;usersReady=true;ready()}else if(users.length)usersReady=true;
+    if(fresh(snap)){uOk=true;usersReady=true;ready()}else if(users.length)usersReady=true;
     restore();renderAll();
   },fail));
   unsubs.push(cKids.onSnapshot(snap=>{
     kids=snap.docs.map(d=>Object.assign({_id:d.id},d.data()));
-    if(!snap.metadata.fromCache){kOk=true;ready()}
+    if(fresh(snap)){kOk=true;ready()}
     renderAll();
   },fail));
 }
