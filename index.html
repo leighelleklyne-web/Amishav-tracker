@@ -224,14 +224,14 @@ dialog h2{margin-bottom:14px}
 
   <!-- MADRICH / NACHSHON: my chanichim -->
   <section id="vMine" class="hid">
-    <div class="row"><h2 id="myTitle">החניכים שלי</h2><span class="sp"></span><button class="pri" id="addBtn">+ הוספת חניך/ה</button></div>
+    <div class="row"><h2 id="myTitle">החניכים שלי</h2><span class="sp"></span><button id="csvMine">הורדה ל-CSV</button><button class="pri" id="addBtn">+ הוספת חניך/ה</button></div>
     <div class="week" data-week></div>
     <div id="myList" class="list" style="margin-top:14px"></div>
   </section>
 
   <!-- RAKAZ: overview per snif -->
   <section id="vOver" class="hid">
-    <div class="row"><h2 id="oTitle">תמונת מצב לפי סניף</h2><span class="sp"></span><button id="editSnifs">עריכת הסניפים שלי</button></div>
+    <div class="row"><h2 id="oTitle">תמונת מצב לפי סניף</h2><span class="sp"></span><button id="csvAllWeek">CSV – השבוע</button><button id="csvAllHist">CSV – כל השבועות</button><button id="editSnifs">עריכת הסניפים שלי</button></div>
     <div class="card hid" id="snifEd" style="margin-top:12px">
       <label for="oSnifAdd">הסניפים שאני מרכז/ת</label>
       <div class="addRow"><input id="oSnifAdd" list="dlSnif" autocomplete="off" placeholder="שם סניף"><button type="button" id="oSnifBtn">הוספה</button></div>
@@ -245,7 +245,7 @@ dialog h2{margin-bottom:14px}
 
   <!-- RAKAZ: detail (amishav or nachshon) -->
   <section id="vTrack" class="hid">
-    <div class="row"><h2 id="rTitle">מעקב</h2><span class="sp"></span><button id="csvBtn">העתקה לאקסל (CSV)</button></div>
+    <div class="row"><h2 id="rTitle">מעקב</h2><span class="sp"></span><button id="csvBtn">הורדה ל-CSV</button></div>
     <div class="chips" id="snifChips"></div>
     <div class="week" data-week></div>
     <div class="stats" id="stats"></div>
@@ -624,12 +624,26 @@ function renderTrack(){
     </tbody></table></div></div>`}).join('');
 }
 ['q','fSt','fPr'].forEach(id=>$(id).addEventListener('input',renderTrack));
-$('csvBtn').addEventListener('click',async()=>{
-  const H=['שבוע','סניף','מסגרת','מדריך/נחשוניסט','שם החניך/ה','שבט','טלפון חניך','שם ההורים','טלפון הורים','כתובת','מאיפה עלו','שנת עלייה','הגיע/ה?','מצב','צעד לשבוע-שבועיים'];
-  const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
-  const rows=filtered().map(k=>{const e=entry(k,week)||{};return [weekLabel(week),k.snif,PROG[prog(k)],madName(k),k.name,k.shevet,k.phone,k.parents,k.pphone,k.address,k.origin,k.year,e.arrived==='yes'?'כן':e.arrived==='no'?'לא':'',ST[e.status]||'',e.step].map(q).join(',')});
-  try{await navigator.clipboard.writeText([H.map(q).join(','),...rows].join('\n'));toast('הועתק – אפשר להדביק באקסל')}catch(e){toast('ההעתקה נחסמה בדפדפן')}
-});
+/* ---------- CSV export ---------- */
+const CSVH=['שבוע','סניף','מסגרת','מדריך/נחשוניסט','שם החניך/ה','שבט','טלפון חניך','שם ההורים','טלפון הורים','כתובת','מאיפה עלו','שנת עלייה','הגיע/ה?','מצב','צעד לשבוע-שבועיים','עודכן ע"י'];
+const csvQ=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+const csvRow=(k,w)=>{const e=entry(k,w)||{};return [weekLabel(w),k.snif,PROG[prog(k)],madName(k),k.name,k.shevet,k.phone,k.parents,k.pphone,k.address,k.origin,k.year,e.arrived==='yes'?'כן':e.arrived==='no'?'לא':'',ST[e.status]||'',e.step,e.by?((userBy(e.by)||{}).name||e.by):''].map(csvQ).join(',')};
+async function exportCSV(rows,name){
+  if(!rows.length){toast('אין נתונים להורדה');return}
+  const text=[CSVH.map(csvQ).join(','),...rows].join('\r\n');
+  if(typeof window.claude==='undefined'){
+    const url=URL.createObjectURL(new Blob(['\uFEFF'+text],{type:'text/csv;charset=utf-8'}));
+    const a=document.createElement('a');a.href=url;a.download=name.replace(/[\\/:*?"<>|]/g,'-')+'.csv';document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),2000);toast('הקובץ ירד – אפשר לפתוח באקסל');return;
+  }
+  try{await navigator.clipboard.writeText(text);toast('הועתק – אפשר להדביק באקסל')}catch(e){toast('ההורדה נחסמה כאן – נסו מהאתר ב-GitHub')}
+}
+const byName=(a,b)=>heSort(norm(a.snif)+prog(a)+madName(a)+a.name,norm(b.snif)+prog(b)+madName(b)+b.name);
+$('csvBtn').addEventListener('click',()=>exportCSV(filtered().sort(byName).map(k=>csvRow(k,week)),`עמישב-${cur==='nachshon'?'נחשון':'מדריכים'}-${snifSel||'כל-הסניפים'}-${week}`));
+$('csvMine').addEventListener('click',()=>exportCSV(kids.filter(k=>k.madrich===me.username).sort(byName).map(k=>csvRow(k,week)),`עמישב-${me.name}-${week}`));
+const myAll=()=>kids.filter(k=>mySnifs().includes(norm(k.snif))).sort(byName);
+$('csvAllWeek').addEventListener('click',()=>exportCSV(myAll().map(k=>csvRow(k,week)),`עמישב-כל-הסניפים-${week}`));
+$('csvAllHist').addEventListener('click',()=>exportCSV(myAll().flatMap(k=>Object.keys(k.log||{}).sort().map(w=>csvRow(k,w))),`עמישב-היסטוריה-מלאה-${THIS}`));
 
 /* ---------- rakaz: staff ---------- */
 function renderUsers(){
@@ -736,6 +750,7 @@ function renderAll(){
   $('editSnifs').classList.toggle('hid',me.role==='shmini');renderWeekBars();renderHero();renderMine();renderOver();renderTrack();renderUsers();
 }
 
+const LOCAL_MSG='שימו לב: האתר עדיין לא מחובר למסד נתונים משותף, ולכן מה שמוזן כאן נשמר רק במכשיר ובדפדפן הזה. אחרי החיבור ל-Firebase כל הצוות יראה את אותם נתונים.';
 /* ---------- local fallback db (when the file is opened outside Claude) ---------- */
 function localDb(){
   const KEY='amishav_local_db';let S={};try{S=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}
@@ -752,14 +767,14 @@ function localDb(){
 renderAuth();note('טוען…');
 (async()=>{
   const standalone=typeof window.claude==='undefined';
-  if(standalone){db=localDb();note('מצב מקומי: הקובץ נפתח מחוץ ל-Claude, ולכן הנתונים נשמרים רק בדפדפן הזה ולא משותפים עם הצוות.')}
+  if(standalone){db=localDb();note(LOCAL_MSG)}
   else{try{db=await claude.use('db')}catch(e){db=null}}
   if(!db){note('אי אפשר להתחבר למאגר הנתונים בתצוגה הזו. פתחו את העמוד כשאתם מחוברים ל-Claude.');return}
   cKids=db.collection('chanichim');cUsers=db.collection('users');cResets=db.collection('resets');
   cResets.onSnapshot(snap=>{resets=snap.docs.map(d=>Object.assign({},d.data(),{email:d.id}));if(me)renderAll()},()=>{});
   let kOk=false,uOk=false;
   const timer=setTimeout(()=>note('הנתונים עדיין לא זמינים – מנסה להתחבר…'),10000);
-  const ready=()=>{if(kOk&&uOk){clearTimeout(timer);note(standalone?'מצב מקומי: הקובץ נפתח מחוץ ל-Claude, ולכן הנתונים נשמרים רק בדפדפן הזה ולא משותפים עם הצוות.':'')}};
+  const ready=()=>{if(kOk&&uOk){clearTimeout(timer);note(standalone?LOCAL_MSG:'')}};
   cUsers.onSnapshot(snap=>{
     users=snap.docs.map(d=>Object.assign({},d.data(),{username:d.id}));
     if(!snap.metadata.fromCache){uOk=true;usersReady=true;ready()}else if(users.length)usersReady=true;
