@@ -331,6 +331,8 @@ dialog h2{margin-bottom:14px}
     <b>מחיקת החשבון</b>
     <p class="small" style="margin:4px 0 0">החשבון יימחק ולא יהיה אפשר להיכנס איתו. אפשר להירשם מחדש אחר כך.</p>
     <label class="chk"><input type="checkbox" id="acKids"> למחוק גם את החניכים שהוספתי (וכל ההיסטוריה שלהם)</label>
+    <div class="hid" id="acPassWrap"><label for="acPass">לאישור, הקלידו את הסיסמה שלכם</label><input id="acPass" type="password" dir="ltr" autocomplete="current-password"></div>
+    <p class="small hid" id="acGTxt" style="margin:6px 0">לאישור ייפתח חלון של Google – בחרו בו את החשבון שלכם.</p>
     <div class="err" id="acErr"></div>
     <button type="button" class="del" id="acDel">מחיקת החשבון שלי</button>
   </div>
@@ -901,24 +903,40 @@ $('meName').addEventListener('click',()=>{
   if(!me)return;
   $('acInfo').textContent=`${me.name} · ${me.username} · ${ROLE[me.role]||''}${mySnifs().length?' · '+mySnifs().join(', '):''}`;
   const pwAcct=mode!=='firebase'||(fb.currentUser&&fb.currentUser.providerData.some(p=>p.providerId==='password'));
-  $('acPw').classList.toggle('hid',!pwAcct);$('acErr').textContent='';$('acKids').checked=false;
+  $('acPw').classList.toggle('hid',!pwAcct);$('acPassWrap').classList.toggle('hid',mode!=='firebase'||!pwAcct);$('acGTxt').classList.toggle('hid',mode!=='firebase'||pwAcct);$('acPass').value='';$('acErr').textContent='';$('acKids').checked=false;
   $('acDel').dataset.sure='';$('acDel').textContent='מחיקת החשבון שלי';$('acDlg').showModal();
 });
 $('acPw').addEventListener('click',()=>{$('acDlg').close();openPw(me.username,false)});
 $('acDel').addEventListener('click',async()=>{
-  const b=$('acDel');
-  if(mode==='firebase'){const t=fb.currentUser&&fb.currentUser.metadata.lastSignInTime;
-    if(t&&Date.now()-new Date(t).getTime()>4.5*60000){$('acErr').textContent='מטעמי אבטחה, צאו מהאתר, היכנסו שוב ומחקו מיד אחר כך.';return}}
+  const b=$('acDel'),E=t=>{$('acErr').textContent=t};E('');
+  const pwAcct=mode==='firebase'&&fb.currentUser&&fb.currentUser.providerData.some(p=>p.providerId==='password');
+  if(pwAcct&&!$('acPass').value){E('הקלידו את הסיסמה שלכם לאישור המחיקה');$('acPass').focus();return}
   if(b.dataset.sure!=='1'){b.dataset.sure='1';b.textContent='בטוח? לחצו שוב למחיקה סופית';return}
-  b.disabled=true;$('acErr').textContent='';if(mode==='firebase')registering=true;
+  b.disabled=true;let step='אימות';
   try{
+    if(mode==='firebase'){
+      const cu=fb.currentUser;if(!cu)throw{code:'auth/no-current-user'};
+      if(pwAcct)await cu.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(cu.email,$('acPass').value));
+      else await cu.reauthenticateWithPopup(new firebase.auth.GoogleAuthProvider());
+      registering=true;
+    }
+    step='מחיקת החניכים';
     if($('acKids').checked)for(const k of kids.filter(k=>k.madrich===me.username))await cKids.doc(k._id).delete();
+    step='עדכון רשימת הסניפים';
     if(me.role==='rakaz'||me.role==='admin')await publishSnifim(users.filter(u=>(u.role==='rakaz'||u.role==='admin')&&u.username!==me.username).flatMap(u=>snifsOf(u,true)));
+    step='מחיקת הפרופיל';
     await cUsers.doc(me.username).delete();
+    step='מחיקת חשבון ההתחברות';
     if(mode==='firebase')await fb.currentUser.delete();
     $('acDlg').close();toast('החשבון נמחק');
     me=null;store.del('am_sess');location.hash='';authMode='login';renderAll();
-  }catch(x){$('acErr').textContent=mode==='firebase'?fbErr(x):'המחיקה נכשלה, נסו שוב'}
+  }catch(x){
+    const c=x&&x.code;
+    E(c==='auth/wrong-password'||c==='auth/invalid-credential'||c==='auth/invalid-login-credentials'?'הסיסמה שגויה':
+      c==='auth/popup-closed-by-user'||c==='auth/cancelled-popup-request'?'האישור בוטל – החשבון לא נמחק':
+      c==='auth/user-mismatch'?'בחרתם חשבון Google אחר – בחרו את החשבון שאיתו נכנסתם':
+      `${step} נכשלה: `+(mode==='firebase'?fbErr(x):'נסו שוב'));
+  }
   finally{registering=false;b.disabled=false;b.dataset.sure='';b.textContent='מחיקת החשבון שלי'}
 });
 
