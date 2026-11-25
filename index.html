@@ -301,6 +301,16 @@ header.top{background:#fff;color:var(--ink);box-shadow:0 1px 0 var(--line),0 4px
       <div class="chipEd" id="uSnifChips"></div>
     </div>
     <div id="reqBox"></div>
+    <div class="card hid" id="resetBox" style="margin:14px 0;border:2px solid var(--r)">
+      <b>איפוס מלא של האתר</b>
+      <p class="small" style="margin:2px 0 8px">מוחק את <b>כל</b> המידע: כל החניכים וההיסטוריה, כל הפרופילים של אנשי הצוות, ואת רשימת הסניפים. בסוף גם החשבון שלך נמחק, והאתר חוזר להיות ריק לגמרי. אי אפשר לבטל את זה.</p>
+      <div class="grid">
+        <div><label for="rsWord">כדי לאשר, כתבו: איפוס</label><input id="rsWord" autocomplete="off"></div>
+        <div id="rsPassWrap"><label for="rsPass">הסיסמה שלך</label><input id="rsPass" type="password" dir="ltr" autocomplete="current-password"></div>
+      </div>
+      <div class="err" id="rsErr"></div>
+      <button type="button" class="del" id="rsBtn">איפוס כל האתר</button>
+    </div>
     <p class="small">כל אנשי הצוות נרשמים בעצמם בעמוד הכניסה. כאן אפשר לטפל בבקשות "שכחתי סיסמה", לאפס סיסמה או למחוק משתמש.</p>
     <div class="scroll"><table class="stack"><thead><tr><th>שם</th><th>אימייל</th><th>תפקיד</th><th>סניף</th><th>חניכים</th><th></th></tr></thead><tbody id="uBody"></tbody></table></div>
   </section>
@@ -417,6 +427,7 @@ let week=THIS;
 
 /* ---------- state ---------- */
 let db=null,cKids=null,cUsers=null,kids=[],users=[],usersReady=false,me=null,snifSel='',editId=null,pUser=null,authMode='login',regRole='madrich',regSnifs=[],edSnifs=[];
+const OWNERS=['tfutzot@bna.org.il','leighelleklyne@gmail.com'];
 const SHEVATIM=['רגבים','זרעים','נבטים','ניצנים','מעלות','הרא"ה','קדם'];
 const shvSort=(a,b)=>{const i=SHEVATIM.indexOf(a),j=SHEVATIM.indexOf(b);return (i<0?99:i)-(j<0?99:j)||heSort(a,b)};
 let snifNames=[],metaLoaded=false,backfilled=false,cMeta=null;
@@ -809,7 +820,9 @@ $('csvAllHist').addEventListener('click',()=>exportCSV(myAll().flatMap(k=>Object
 /* ---------- rakaz: staff ---------- */
 function renderUsers(){
   if(!isMgr())return;
-  const canEd=me.role==='rakaz'||me.role==='admin';$('uSnifBox').classList.toggle('hid',!canEd);
+  const canEd=me.role==='rakaz'||me.role==='admin';
+  $('resetBox').classList.toggle('hid',!OWNERS.includes(me.username));
+  $('rsPassWrap').classList.toggle('hid',!(mode==='firebase'&&fb.currentUser&&fb.currentUser.providerData.some(p=>p.providerId==='password')));$('uSnifBox').classList.toggle('hid',!canEd);
   if(canEd){const mine=snifsOf(me,true);$('uSnifChips').innerHTML=mine.map(x=>`<span>${esc(x)}<button type="button" data-urm="${esc(x)}" aria-label="הסרת ${esc(x)}">×</button></span>`).join('')}
   const sn=mySnifs();
   const reqs=resets.filter(r=>r.email!==me.username&&userBy(r.email)&&snifsOf(userBy(r.email)).some(s=>sn.includes(s)));
@@ -854,6 +867,29 @@ $('uSnifAdd').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefaul
 $('uSnifChips').addEventListener('click',async e=>{const b=e.target.closest('[data-urm]');if(!b)return;
   if(b.dataset.sure!=='1'){b.dataset.sure='1';b.textContent='להסיר?';return}
   if(await saveMySnifim(snifsOf(me,true).filter(x=>x!==b.dataset.urm)))toast(`סניף ${b.dataset.urm} הוסר מהרשימה שלך`)});
+
+$('rsBtn').addEventListener('click',async()=>{
+  const E=t=>{$('rsErr').textContent=t};E('');
+  if(norm($('rsWord').value)!=='איפוס')return E('כתבו "איפוס" בשדה כדי לאשר');
+  const pwAcct=mode==='firebase'&&fb.currentUser&&fb.currentUser.providerData.some(p=>p.providerId==='password');
+  if(pwAcct&&!$('rsPass').value)return E('הקלידו את הסיסמה שלך');
+  const b=$('rsBtn');b.disabled=true;let step='אימות';
+  try{
+    if(mode==='firebase'){const cu=fb.currentUser;
+      if(pwAcct)await cu.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(cu.email,$('rsPass').value));
+      else await cu.reauthenticateWithPopup(new firebase.auth.GoogleAuthProvider());}
+    registering=true;const mine=me.username,del=(c,ids)=>Promise.all(ids.map(id=>c.doc(id).delete()));
+    step='מחיקת החניכים';await del(cKids,kids.map(k=>k._id));
+    step='מחיקת אנשי הצוות';await del(cUsers,users.map(u=>u.username).filter(u=>u!==mine));
+    step='מחיקת רשימת הסניפים';await cMeta.doc('snifim').delete();
+    if(mode!=='firebase')await del(cResets,resets.map(r=>r.email));
+    step='מחיקת החשבון שלך';await cUsers.doc(mine).delete();
+    if(mode==='firebase')await fb.currentUser.delete();
+    me=null;store.del('am_sess');location.hash='';authMode='login';$('rsWord').value='';$('rsPass').value='';
+    toast('האתר אופס – הכול ריק');renderAll();
+  }catch(x){const c=x&&x.code;E(c==='auth/wrong-password'||c==='auth/invalid-credential'||c==='auth/invalid-login-credentials'?'הסיסמה שגויה':`${step} נכשלה: `+(mode==='firebase'?fbErr(x):'נסו שוב'))}
+  finally{registering=false;b.disabled=false}
+});
 
 /* ---------- chanich details dialog ---------- */
 function openForm(id){
