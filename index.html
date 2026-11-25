@@ -399,7 +399,7 @@ const shvSort=(a,b)=>{const i=SHEVATIM.indexOf(a),j=SHEVATIM.indexOf(b);return (
 let snifNames=[],metaLoaded=false,backfilled=false,cMeta=null;
 const drafts={};let cResets=null,resets=[],mode='local',fb=null,fbUser=null,registering=false,unsubs=[],uOk=false;
 const FBV='10.14.1',loadScript=src=>new Promise((ok,no)=>{const t=document.createElement('script');t.src=src;t.onload=ok;t.onerror=no;document.head.appendChild(t)});
-const fbErr=x=>({'auth/email-already-in-use':'האימייל הזה כבר רשום – עברו ללשונית "כניסה"','auth/invalid-email':'כתובת אימייל לא תקינה','auth/weak-password':'הסיסמה חלשה מדי','auth/network-request-failed':'אין חיבור לאינטרנט','auth/too-many-requests':'יותר מדי ניסיונות. נסו שוב בעוד כמה דקות','auth/requires-recent-login':'מטעמי אבטחה צריך לצאת, להיכנס שוב ולנסות שוב'}[x&&x.code]||'משהו השתבש, נסו שוב');
+const fbErr=x=>({'auth/email-already-in-use':'האימייל הזה כבר רשום – עברו ללשונית "כניסה"','auth/invalid-email':'כתובת אימייל לא תקינה','auth/weak-password':'הסיסמה חלשה מדי','auth/network-request-failed':'אין חיבור לאינטרנט','auth/too-many-requests':'יותר מדי ניסיונות. נסו שוב בעוד כמה דקות','auth/requires-recent-login':'מטעמי אבטחה צריך לצאת, להיכנס שוב ולנסות שוב','permission-denied':'אין הרשאה לפעולה הזו – כנראה שכללי האבטחה ב-Firebase לא מעודכנים'}[x&&x.code]||('משהו השתבש, נסו שוב'+(x&&x.code?' ('+x.code+')':'')));
 function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),2400)}
 function note(t){$('note').textContent=t||''}
 const entry=(k,w)=>(k.log&&k.log[w])||null;
