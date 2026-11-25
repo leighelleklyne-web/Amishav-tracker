@@ -6,31 +6,34 @@ service cloud.firestore {
     function signedIn() { return request.auth != null; }
     function myEmail() { return request.auth.token.email.lower(); }
     function myProfile() { return get(/databases/$(database)/documents/users/$(myEmail())).data; }
-    function isMgr() {
-      return signedIn()
-        && exists(/databases/$(database)/documents/users/$(myEmail()))
-        && myProfile().role in ['rakaz', 'shmini', 'admin'];
-    }
+    function hasProfile() { return signedIn() && exists(/databases/$(database)/documents/users/$(myEmail())); }
+    function isMgr() { return hasProfile() && myProfile().role in ['rakaz', 'shmini', 'admin']; }
+    function isRakaz() { return hasProfile() && myProfile().role in ['rakaz', 'admin']; }
+    // בעלות האתר – רק הן יכולות לאפס את כל האתר
+    function isOwner() { return signedIn() && myEmail() in ['tfutzot@bna.org.il', 'leighelleklyne@gmail.com']; }
 
     // פרופילים של אנשי הצוות (המזהה הוא האימייל)
     match /users/{email} {
       allow read: if signedIn();
       allow create: if signedIn() && email == myEmail() && request.resource.data.email == email;
       allow update: if signedIn() && (email == myEmail() || isMgr());
-      allow delete: if signedIn() && (email == myEmail() || isMgr());
+      // מוחקים: את עצמך, בעלת האתר, או רכז/ת שמוחק/ת מדריך/נחשוניסט/שמיניסט (לא רכזות אחרות)
+      allow delete: if signedIn() && (email == myEmail() || isOwner()
+        || (isRakaz() && resource.data.role in ['madrich', 'nachshon', 'shmini']));
     }
 
-    // רשימת הסניפים (הרכזות מגדירות אותה). כולם יכולים לקרוא, כדי לבחור סניף בהרשמה
+    // רשימת הסניפים: כולם קוראים (להרשמה), רכזות מעדכנות, ורק בעלת האתר מוחקת
     match /meta/{doc} {
       allow read: if true;
-      allow write: if isMgr();
+      allow create, update: if isRakaz() || isOwner();
+      allow delete: if isOwner();
     }
 
     // חניכים: מדריך יוצר ומעדכן את החניכים שלו, רכז/שמיניסט יכולים לעדכן את כולם
     match /chanichim/{id} {
       allow read: if signedIn();
       allow create: if signedIn() && request.resource.data.madrich == myEmail();
-      allow update, delete: if signedIn() && (resource.data.madrich == myEmail() || isMgr());
+      allow update, delete: if signedIn() && (resource.data.madrich == myEmail() || isMgr() || isOwner());
     }
   }
 }
