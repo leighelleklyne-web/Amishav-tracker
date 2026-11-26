@@ -1118,16 +1118,18 @@ $('imGo').addEventListener('click',async()=>{
     const load={};kids.forEach(k=>{if(k.madrich)load[k.madrich]=(load[k.madrich]||0)+1});
     const pick=(sn,sh)=>{const c=users.filter(u=>u.role==='madrich'&&snifsOf(u).includes(sn)&&sh&&norm(u.shevet)===sh);if(!c.length)return'';
       c.sort((a,b)=>(load[a.username]||0)-(load[b.username]||0));load[c[0].username]=(load[c[0].username]||0)+1;return c[0].username};
-    let kNew=0,kAs=0,kFix=0;const seen=new Set();
+    let kNew=0,kAs=0,kFix=0,kRed=0;const seen=new Set();
     out.forEach(o=>{const key=o.snif+'|'+olNorm(o.name);if(seen.has(key))return;seen.add(key);
       const k=olMatch(o);
-      if(k){if(!k.madrich){const m=pick(o.snif,o.shevet);if(m){kFix++;ops.push(()=>cKids.doc(k._id).update({madrich:m}))}}return}
+      if(k){const upd={};if(!k.madrich){const m=pick(o.snif,o.shevet);if(m){kFix++;upd.madrich=m}}
+        if(!statusAt(k,THIS)){kRed++;upd.initStatus='red'}
+        if(Object.keys(upd).length)ops.push(()=>cKids.doc(k._id).update(upd));return}
       const m=pick(o.snif,o.shevet);kNew++;if(m)kAs++;
       ops.push(()=>cKids.doc().set({name:o.name,shevet:o.shevet,phone:o.phone,parents:o.parents,pphone:o.pphone,address:o.address,origin:o.origin,year:o.year,
         program:'snif',madrich:m,snif:o.snif,log:{},initStatus:'red',created:new Date().toISOString(),fromImport:imRows.file}))});
     for(let i=0;i<ops.length;i+=20)await Promise.all(ops.slice(i,i+20).map(f=>f()));
     $('imDlg').close();
-    imResult=`יובאו ${added} עולים`+(upd?` (${upd} עודכנו)`:'')+`. נוספו ${kNew} חניכים חדשים במצב אדום`+(kNew?`: ${kAs} שויכו למדריכים לפי שבט`+(kNew-kAs?`, ${kNew-kAs} עוד בלי מדריך`:''):'')+(kFix?`. ${kFix} חניכים קיימים שויכו למדריך`:'')+'.';
+    imResult=`יובאו ${added} עולים`+(upd?` (${upd} עודכנו)`:'')+`. נוספו ${kNew} חניכים חדשים במצב אדום`+(kNew?`: ${kAs} שויכו למדריכים לפי שבט`+(kNew-kAs?`, ${kNew-kAs} עוד בלי מדריך`:''):'')+(kRed?`. ${kRed} חניכים שכבר היו במערכת בלי סטטוס סומנו באדום`:'')+(kFix?`. ${kFix} חניכים קיימים שויכו למדריך`:'')+'.';
     $('olResult').textContent=imResult;$('olResult').classList.remove('hid');toast('הייבוא הושלם');olSnif=$('imSnif').value==='__col'?'':$('imSnif').value;
   }catch(e){$('imErr').textContent=mode==='firebase'?fbErr(e):'הייבוא נכשל'}
   finally{b.disabled=false}
