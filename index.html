@@ -340,7 +340,7 @@ body{background-image:radial-gradient(circle at 1px 1px,rgba(85,176,255,.13) 1px
     <div id="missBox"></div>
     <div class="row" style="margin-top:14px">
       <div style="flex:1 1 220px"><label for="q">חיפוש</label><input id="q" placeholder="שם חניך, מדריך, שבט…"></div>
-      <div style="flex:0 1 190px"><label for="fSt">מצב השבוע</label>
+      <div style="flex:0 1 190px"><label for="fSt">מצב</label>
         <select id="fSt"><option value="">הכול</option><option value="green">ירוק</option><option value="yellow">צהוב</option><option value="red">אדום</option><option value="none">לא עודכן</option></select></div>
       <div style="flex:0 1 170px"><label for="fSh">שבט</label><select id="fSh"></select></div>
       <div style="flex:0 1 190px" id="fPrWrap"><label for="fPr">מסגרת</label>
@@ -397,7 +397,7 @@ body{background-image:radial-gradient(circle at 1px 1px,rgba(85,176,255,.13) 1px
       <div class="err" id="rsErr"></div>
       <button type="button" class="del" id="rsBtn">איפוס כל האתר</button>
     </div>
-    <p class="small">כל אנשי הצוות נרשמים בעצמם בעמוד הכניסה. כאן אפשר לטפל בבקשות "שכחתי סיסמה", לאפס סיסמה או למחוק משתמש.</p>
+    <p class="small"><span id="uLead">כל אנשי הצוות נרשמים בעצמם בעמוד הכניסה.</span></p>
     <div class="scroll"><table class="stack"><thead><tr><th>שם</th><th>אימייל</th><th>תפקיד</th><th>סניף</th><th>שבט</th><th>חניכים</th><th></th></tr></thead><tbody id="uBody"></tbody></table></div>
   </section>
 </div></main>
@@ -622,7 +622,7 @@ function chipAdd(inp,el,arr){const v=norm(inp.value);if(v&&!arr.includes(v))arr.
 /* ---------- routing ---------- */
 function tabsFor(){
   if(!me)return[];
-  if(isMgr()){const sn=mySnifs(),n=resets.filter(r=>r.email!==me.username&&userBy(r.email)&&snifsOf(userBy(r.email)).some(s=>sn.includes(s))).length;
+  if(isMgr()){const sn=mySnifs(),n=!(me.role==='rakaz'||me.role==='admin')?0:resets.filter(r=>r.email!==me.username&&userBy(r.email)&&snifsOf(userBy(r.email)).some(s=>sn.includes(s))).length;
     return[['overview','תמונת מצב','home'],['track','מדריכים','people'],['nachshon','נחשון','sprout'],['olim','איתור עולים','list'],['users','צוות'+(n?` (${n})`:''),'gear']]}
   return[['mine',me.role==='nachshon'?'החניכים שלי בנחשון':'החניכים שלי','kid']];
 }
@@ -946,7 +946,7 @@ function scopeKids(){
 function filtered(){
   const q=norm($('q').value).toLowerCase(),fs=$('fSt').value,fp=$('fPr').value,fh=$('fSh').value;
   return scopeKids().filter(k=>{const e=entry(k,week);
-    return (!fh||norm(k.shevet)===fh)&&(!fs||(fs==='none'?!e:(e&&e.status===fs)))&&(!fp||cur!=='nachshon'||prog(k)===fp)&&(!q||[k.name,madName(k),k.shevet,k.parents,k.origin].join(' ').toLowerCase().includes(q))});
+    return (!fh||norm(k.shevet)===fh)&&(!fs||(fs==='none'?!e:statusAt(k,week)===fs))&&(!fp||cur!=='nachshon'||prog(k)===fp)&&(!q||[k.name,madName(k),k.shevet,k.parents,k.origin].join(' ').toLowerCase().includes(q))});
 }
 function renderTrack(){
   if(!isMgr()||(cur!=='track'&&cur!=='nachshon'))return;
@@ -957,7 +957,7 @@ function renderTrack(){
   $('snifChips').innerHTML=sn.length>1?[['','כל הסניפים שלי'],...sn.map(s=>[s,s])].map(([v,t])=>`<button data-snif="${esc(v)}" aria-pressed="${v===snifSel}">${esc(t)}</button>`).join(''):'';
   $('rTitle').textContent=(nach?'נחשון':'מדריכים')+' · '+(snifSel||(sn.length===1?sn[0]:'כל הסניפים שלי'));
   $('rLead').textContent=nach?'החניכים במועדונית ובאח גדול, לפי נחשוניסט/ית. לחיצה על שם חניך מציגה את כל ההיסטוריה שלו.':'החניכים של כל מדריך: מה סומן השבוע, ומי עוד לא עודכן. לחיצה על שם חניך מציגה את כל ההיסטוריה שלו.';
-  const base=scopeKids(),es=base.map(k=>entry(k,week)).filter(Boolean),c=s=>es.filter(e=>e.status===s).length;
+  const base=scopeKids(),es=base.map(k=>entry(k,week)).filter(Boolean),c=s=>base.filter(k=>statusAt(k,week)===s).length;
   $('stats').innerHTML=[[base.length,'חניכים',''],[es.length+'/'+base.length,'עודכנו השבוע',''],[es.filter(e=>e.arrived==='yes').length,nach?'הגיעו / נפגשו':'הגיעו השבוע',''],
     [c('green'),'ירוק','green'],[c('yellow'),'צהוב','yellow'],[c('red'),'אדום','red']]
     .map(([n,t,k])=>`<div class="stat"><b>${n}</b><span>${k?`<i class="dot ${k}"></i>`:''}${t}</span></div>`).join('');
@@ -972,9 +972,9 @@ function renderTrack(){
     const rows=by[g].sort((a,b)=>heSort(prog(a)+a.name,prog(b)+b.name)),upd=rows.filter(k=>entry(k,week)).length;
     return `<div class="grp"><h3>${esc(g)} <small>${rows.length} חניכים · עודכנו ${upd}</small></h3>
     <div class="scroll"><table class="stack"><thead><tr><th>שם</th>${nach?'<th>מסגרת</th>':''}<th>שבט</th><th>${nach?'הגיע / נפגשו?':'הגיע/ה?'}</th><th>מצב</th><th>צעד לשבוע–שבועיים</th><th>טלפון הורים</th><th></th></tr></thead><tbody>
-    ${rows.map(k=>{const e=entry(k,week);return `<tr><td><a class="lk" data-hist="${esc(k._id)}">${esc(k.name)}</a></td>${nach?`<td>${PROG[prog(k)]}</td>`:''}<td>${esc(k.shevet)}</td>
+    ${rows.map(k=>{const e=entry(k,week),st=statusAt(k,week),cur=e&&e.status;return `<tr class="${st==='red'?'redrow':''}"><td><a class="lk" data-hist="${esc(k._id)}">${esc(k.name)}</a></td>${nach?`<td>${PROG[prog(k)]}</td>`:''}<td>${esc(k.shevet)}</td>
       <td>${e?(e.arrived==='yes'?'כן':e.arrived==='no'?'לא':''):'<span class="small">לא עודכן</span>'}</td>
-      <td>${e&&e.status?`<span class="dot ${e.status}"></span> ${ST[e.status]}`:''}</td><td>${esc(e&&e.step)}</td><td class="n"><span dir="ltr">${esc(k.pphone)}</span></td>
+      <td>${st?`<span class="dot ${st}"></span> ${ST[st]}${cur?'':`<br><span class="small">${Object.keys(k.log||{}).length?'מהעדכון האחרון':'מהעלאת הרשימה'}</span>`}`:''}</td><td>${esc(e&&e.step)}</td><td class="n"><span dir="ltr">${esc(k.pphone)}</span></td>
       <td><button class="sm" data-edit="${esc(k._id)}">פרטים</button></td></tr>`}).join('')}
     </tbody></table></div></div>`}).join('');
 }
@@ -1014,13 +1014,15 @@ function renderUsers(){
   $('rsPassWrap').classList.toggle('hid',!(mode==='firebase'&&fb.currentUser&&fb.currentUser.providerData.some(p=>p.providerId==='password')));$('uSnifBox').classList.toggle('hid',!canEd);
   if(canEd){const mine=snifsOf(me,true);$('uSnifChips').innerHTML=mine.map(x=>`<span>${esc(x)}<button type="button" data-urm="${esc(x)}" aria-label="הסרת ${esc(x)}">×</button></span>`).join('')}
   const sn=mySnifs();
-  const reqs=resets.filter(r=>r.email!==me.username&&userBy(r.email)&&snifsOf(userBy(r.email)).some(s=>sn.includes(s)));
+  const isRk=me.role==='rakaz'||me.role==='admin';
+  $('uLead').textContent=isRk?'כל אנשי הצוות נרשמים בעצמם בעמוד הכניסה. כאן אפשר לשלוח מייל לאיפוס סיסמה למי ששכח, ולמחוק מדריכים שעזבו.':'המדריכים והנחשוניסטים בסניף שלך. לשינויים ולאיפוס סיסמה – פנו לרכז/ת.';
+  const reqs=!isRk?[]:resets.filter(r=>r.email!==me.username&&userBy(r.email)&&snifsOf(userBy(r.email)).some(s=>sn.includes(s)));
   $('reqBox').innerHTML=reqs.length?`<div class="card req"><b>בקשות לאיפוס סיסמה (${reqs.length})</b><ul>${reqs.map(r=>{const u=userBy(r.email);return `<li><span><b>${esc(u.name)}</b> · ${esc(ROLE[u.role]||'')} · ${esc(snifsOf(u,true).join(', '))} · <span dir="ltr">${esc(r.email)}</span></span><span class="sp"></span><button class="sm pri" data-pw="${esc(r.email)}">קביעת סיסמה זמנית</button><button class="sm" data-rdel="${esc(r.email)}">ביטול הבקשה</button></li>`}).join('')}</ul></div>`:'';
-  const list=users.filter(u=>u.username===me.username||((u.role!=='admin')&&snifsOf(u).some(s=>sn.includes(s))))
+  const list=users.filter(u=>u.username===me.username||((isRk?u.role!=='admin':['madrich','nachshon','shmini'].includes(u.role))&&snifsOf(u).some(s=>sn.includes(s))))
     .sort((a,b)=>heSort(snifsOf(a).join()+a.role+a.name,snifsOf(b).join()+b.role+b.name));
   $('uBody').innerHTML=list.map(u=>{const n=kids.filter(k=>k.madrich===u.username).length,self=u.username===me.username;
-    return `<tr><td><b>${esc(u.name)}</b></td><td><span dir="ltr">${esc(u.username)}</span></td><td>${esc(ROLE[u.role]||u.role)}</td><td>${esc(snifsOf(u,true).join(', '))}</td><td>${u.role==='madrich'?`<select data-ushv="${esc(u.username)}" style="min-height:36px;padding:4px 8px"><option value="">—</option>${[...new Set([...allSh(),...(u.shevet?[u.shevet]:[])])].map(x=>`<option ${x===u.shevet?'selected':''}>${esc(x)}</option>`).join('')}</select>`:''}</td><td>${n||''}</td>
-    <td><button class="sm" data-pw="${esc(u.username)}">${self?'שינוי הסיסמה שלי':mode==='firebase'?'שליחת מייל איפוס':'איפוס סיסמה'}</button>${self||u.role==='rakaz'?'':` <button class="sm del" data-udel="${esc(u.username)}">מחיקה</button>`}</td></tr>`}).join('');
+    return `<tr><td><b>${esc(u.name)}</b></td><td><span dir="ltr">${esc(u.username)}</span></td><td>${esc(ROLE[u.role]||u.role)}</td><td>${esc(snifsOf(u,true).join(', '))}</td><td>${u.role==='madrich'&&!isRk?esc(u.shevet||''):''}${u.role==='madrich'&&isRk?`<select data-ushv="${esc(u.username)}" style="min-height:36px;padding:4px 8px"><option value="">—</option>${[...new Set([...allSh(),...(u.shevet?[u.shevet]:[])])].map(x=>`<option ${x===u.shevet?'selected':''}>${esc(x)}</option>`).join('')}</select>`:''}</td><td>${n||''}</td>
+    <td>${isRk&&!self&&u.role!=='rakaz'?`<button class="sm" data-pw="${esc(u.username)}">${mode==='firebase'?'שליחת מייל איפוס':'איפוס סיסמה'}</button> <button class="sm del" data-udel="${esc(u.username)}">מחיקה</button>`:''}</td></tr>`}).join('');
 }
 $('vUsers').addEventListener('change',async e=>{const sl=e.target.closest('[data-ushv]');if(!sl)return;
   try{await cUsers.doc(sl.dataset.ushv).update({shevet:sl.value});toast('השבט עודכן')}catch(x){toast(mode==='firebase'?fbErr(x):'העדכון נכשל')}});
