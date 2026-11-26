@@ -355,6 +355,7 @@ body{background-image:radial-gradient(circle at 1px 1px,rgba(85,176,255,.13) 1px
     <p class="lead">מעלים את רשימת העולים (אקסל מהעירייה או מהקליטה), והאתר בודק מי כבר מגיע ומי עוד לא – לפי שבט. מי שלא מגיע נכנס אוטומטית <b style="color:var(--r)">באדום</b> ומשויך למדריך של השבט. עולים מלפני יותר מ-10 שנים לא נכללים.</p>
     <label class="upl" id="olDrop"><input type="file" id="olFile" accept=".xlsx,.csv,.txt"><b>העלאת קובץ אקסל (xlsx) או CSV</b><br><span class="small">לחצו לבחירת קובץ, או גררו אותו לכאן</span></label>
     <div class="okmsg hid" id="olResult" style="margin-top:12px"></div>
+    <div class="card hint hid" id="olMissing" style="margin-top:12px;display:flex;flex-wrap:wrap;gap:10px;align-items:center"><span id="olMissTxt"></span><span class="sp"></span><button class="pri" id="olAddAll">הוספת כולם למעקב באדום</button></div>
     <div class="chips" id="olSnifChips"></div>
     <div class="row" style="margin-top:12px">
       <div style="flex:1 1 200px"><label for="olQ">חיפוש</label><input id="olQ" placeholder="שם, ארץ, הורים…"></div>
@@ -388,7 +389,7 @@ body{background-image:radial-gradient(circle at 1px 1px,rgba(85,176,255,.13) 1px
     </div>
     <div class="card hid" id="resetBox" style="margin:14px 0;border:2px solid var(--r)">
       <b>איפוס מלא של האתר</b>
-      <p class="small" style="margin:2px 0 8px">מוחק את <b>כל</b> המידע: כל החניכים וההיסטוריה, כל הפרופילים של אנשי הצוות, ואת רשימת הסניפים. בסוף גם החשבון שלך נמחק, והאתר חוזר להיות ריק לגמרי. אי אפשר לבטל את זה.</p>
+      <p class="small" style="margin:2px 0 8px">מוחק את <b>כל</b> המידע: כל החניכים וההיסטוריה, רשימת העולים מהאקסל, כל הפרופילים של אנשי הצוות, רשימת הסניפים ושמות השבטים. בסוף גם החשבון שלך נמחק, והאתר חוזר להיות ריק לגמרי. אי אפשר לבטל את זה.</p>
       <div class="grid">
         <div><label for="rsWord">כדי לאשר, כתבו: איפוס</label><input id="rsWord" autocomplete="off"></div>
         <div id="rsPassWrap"><label for="rsPass">הסיסמה שלך</label><input id="rsPass" type="password" dir="ltr" autocomplete="current-password"></div>
@@ -591,7 +592,7 @@ function gradeToSh(v){
 }
 function toShevet(v){const q=qn(v);if(!q)return'';const hit=shOrder().find(x=>qn(x)===q);return hit||gradeToSh(v)}
 const shvSort=(a,b)=>{const O=shOrder(),i=O.indexOf(a),j=O.indexOf(b);return (i<0?99:i)-(j<0?99:j)||heSort(a,b)};
-let promos={},kidsLoaded=false,promoAuto=false;
+let promos={},kidsLoaded=false,promoAuto=false,kidsAll=[],olimAll=[];
 let snifNames=[],metaLoaded=false,backfilled=false,cMeta=null,cOlim=null,olim=[],olSnif='',imRows=null,asId=null,imResult='';
 const drafts={};let cResets=null,resets=[],mode='local',fb=null,fbUser=null,registering=false,unsubs=[],uOk=false;
 const FBV='10.14.1',loadScript=src=>new Promise((ok,no)=>{const t=document.createElement('script');t.src=src;t.onload=ok;t.onerror=no;document.head.appendChild(t)});
@@ -601,7 +602,8 @@ function note(t){$('note').textContent=t||''}
 const entry=(k,w)=>(k.log&&k.log[w])||null;
 function statusAt(k,upto){const ks=Object.keys(k.log||{}).filter(w=>w<=upto).sort();for(let i=ks.length-1;i>=0;i--)if(k.log[ks[i]].status)return k.log[ks[i]].status;return k.initStatus||''}
 const userBy=u=>users.find(x=>x.username===u);
-const madName=k=>(userBy(k.madrich)||{}).name||k.madrich||'ללא אחראי';
+const userLbl=u=>u?(u.name+(u.role==='madrich'&&u.shevet?` (${u.shevet})`:u.role==='nachshon'?' (נחשון)':'')):'';
+const madName=k=>{const u=userBy(k.madrich);return u?userLbl(u):(k.madrich||'ללא אחראי')};
 const prog=k=>k.program||'snif';
 const isNach=k=>prog(k)!=='snif';
 const isMgr=()=>me&&(me.role==='rakaz'||me.role==='admin'||me.role==='shmini');
@@ -1080,9 +1082,10 @@ $('rsBtn').addEventListener('click',async()=>{
       if(pwAcct)await cu.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(cu.email,$('rsPass').value));
       else await cu.reauthenticateWithPopup(new firebase.auth.GoogleAuthProvider());}
     registering=true;const mine=me.username,del=(c,ids)=>Promise.all(ids.map(id=>c.doc(id).delete()));
-    step='מחיקת החניכים';await del(cKids,kids.map(k=>k._id));
+    step='מחיקת החניכים';await del(cKids,kidsAll.map(k=>k._id));
+    step='מחיקת רשימת העולים';await del(cOlim,olimAll.map(o=>o._id));
     step='מחיקת אנשי הצוות';await del(cUsers,users.map(u=>u.username).filter(u=>u!==mine));
-    step='מחיקת רשימת הסניפים';await cMeta.doc('snifim').delete();
+    step='מחיקת רשימת הסניפים';await cMeta.doc('snifim').delete();await cMeta.doc('promotions').delete();await cMeta.doc('shevatim').delete();
     if(mode!=='firebase')await del(cResets,resets.map(r=>r.email));
     step='מחיקת החשבון שלך';await cUsers.doc(mine).delete();
     if(mode==='firebase')await fb.currentUser.delete();
@@ -1236,6 +1239,7 @@ function renderOlim(){
   $('olSnifChips').innerHTML=sn.length>1?[['','כל הסניפים שלי'],...sn.map(x=>[x,x])].map(([v,t])=>`<button data-olsnif="${esc(v)}" aria-pressed="${v===olSnif}">${esc(t)}</button>`).join(''):'';
   const base=olScope();
   {const v=$('olSh').value,ex=[...new Set(base.map(o=>norm(o.shevet)||'ללא שבט'))];$('olSh').innerHTML='<option value="">כל השבטים</option>'+ex.sort(shvSort).map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');if(ex.includes(v))$('olSh').value=v}
+  {const miss=base.filter(o=>!olMatch(o));$('olMissing').classList.toggle('hid',!miss.length);$('olMissTxt').innerHTML=`<b>${miss.length} עולים מהרשימה עוד לא נמצאים במעקב.</b> אפשר להוסיף את כולם כחניכים במצב אדום – כל אחד ישויך למדריך של השבט שלו.`}
   if(!base.length){$('olSum').innerHTML='';$('olList').innerHTML='<div class="empty">עוד לא הועלתה רשימת עולים. לחצו למעלה כדי להעלות קובץ אקסל.</div>';return}
   const byS={};base.forEach(o=>{const s=norm(o.shevet)||'ללא שבט';(byS[s]=byS[s]||[]).push(o)});
   const tot=base.length,totRed=base.filter(o=>olState(o).red).length;
@@ -1249,6 +1253,15 @@ function renderOlim(){
       <td>${s.k?(s.k.madrich?`<button class="sm" data-hist="${esc(s.k._id)}">היסטוריה</button>`:`<button class="sm pri" data-edit="${esc(s.k._id)}">שיוך למדריך</button>`):`<button class="sm pri" data-assign="${esc(o._id)}">שיוך למדריך</button>`} <button class="sm del" data-oldel="${esc(o._id)}" aria-label="מחיקה מהרשימה">✕</button></td></tr>`}).join('')}</tbody></table></div>`;
 }
 ['olQ','olSh','olSt'].forEach(id=>$(id).addEventListener('input',renderOlim));
+$('olAddAll').addEventListener('click',async()=>{
+  const b=$('olAddAll'),miss=olScope().filter(o=>!olMatch(o));if(!miss.length)return;b.disabled=true;
+  const load={};kids.forEach(k=>{if(k.madrich)load[k.madrich]=(load[k.madrich]||0)+1});let as=0;
+  const ops=miss.map(o=>{const sh=norm(o.shevet),c=users.filter(u=>u.role==='madrich'&&snifsOf(u).includes(norm(o.snif))&&sh&&norm(u.shevet)===sh).sort((a,b)=>(load[a.username]||0)-(load[b.username]||0));
+    const m=c.length?c[0].username:'';if(m){load[m]=(load[m]||0)+1;as++}
+    return()=>cKids.doc().set({name:o.name,shevet:sh,phone:o.phone||'',parents:o.parents||'',pphone:o.pphone||'',address:o.address||'',origin:o.origin||'',year:o.year||'',program:'snif',madrich:m,snif:norm(o.snif),log:{},initStatus:'red',created:new Date().toISOString(),fromOlim:o._id})});
+  try{for(let i=0;i<ops.length;i+=20)await Promise.all(ops.slice(i,i+20).map(f=>f()));toast(`נוספו ${miss.length} חניכים באדום`+(as?`, ${as} שויכו למדריך השבט`:''))}
+  catch(e){toast(mode==='firebase'?fbErr(e):'ההוספה נכשלה')}finally{b.disabled=false}
+});
 $('vOlim').addEventListener('click',async e=>{
   const c=e.target.closest('[data-olsnif]');if(c){olSnif=c.dataset.olsnif;renderOlim();return}
   const d=e.target.closest('[data-oldel]');if(d){if(d.dataset.sure!=='1'){d.dataset.sure='1';d.textContent='למחוק?';return}try{await cOlim.doc(d.dataset.oldel).delete()}catch(x){toast('המחיקה נכשלה')}return}
@@ -1388,12 +1401,18 @@ function openForm(id){
   const nach=id?isNach(k):me.role==='nachshon';
   $('prWrap').classList.toggle('hid',!nach);$('f_program').value=id&&isNach(k)?prog(k):'moadonit';
   const showMad=isMgr()&&!!id;$('madWrap').classList.toggle('hid',!showMad);
-  if(showMad){const sn=mySnifs(),want=nach?'nachshon':'madrich';
-    const opts=users.filter(u=>(u.role===want&&snifsOf(u).some(s=>sn.includes(s)))||u.username===k.madrich);
-    $('f_mad').innerHTML=opts.map(u=>`<option value="${esc(u.username)}" ${u.username===k.madrich?'selected':''}>${esc(u.name)} · ${esc(snifsOf(u,true).join(', '))}</option>`).join('')}
+  if(showMad)fillMadOpts(k,nach);
   $('delBtn').classList.toggle('hid',!id);$('delBtn').dataset.sure='';$('delBtn').textContent='מחיקת חניך';
   $('dlg').showModal();$('f_name').focus();
 }
+function fillMadOpts(k,nach){
+  const sn=norm(k.snif)?[norm(k.snif)]:mySnifs(),sh=norm($('f_shevet').value||k.shevet);
+  const opts=users.filter(u=>nach?(u.role==='nachshon'&&snifsOf(u).some(s=>sn.includes(s))):(u.role==='madrich'&&snifsOf(u).some(s=>sn.includes(s))&&(!sh||norm(u.shevet)===sh)));
+  const cur=opts.some(u=>u.username===k.madrich)?k.madrich:'';
+  $('f_mad').innerHTML=`<option value="">ללא מדריך${!nach&&sh&&!opts.length?` – אין עדיין מדריך לשבט ${esc(sh)}`:''}</option>`+opts.map(u=>`<option value="${esc(u.username)}" ${u.username===cur?'selected':''}>${esc(userLbl(u))} · ${esc(snifsOf(u,true).join(', '))}</option>`).join('');
+  if(!cur&&opts.length===1&&!k.madrich)$('f_mad').value=opts[0].username;
+}
+$('f_shevet').addEventListener('change',()=>{if(editId&&isMgr()){const k=kids.find(x=>x._id===editId);if(k)fillMadOpts(Object.assign({},k,{madrich:''}),isNach(k))}});
 $('addBtn').addEventListener('click',()=>openForm());
 $('frm').addEventListener('submit',async e=>{
   e.preventDefault();
@@ -1403,7 +1422,7 @@ $('frm').addEventListener('submit',async e=>{
   if(nach)body.program=$('f_program').value;
   $('saveBtn').disabled=true;
   try{
-    if(editId){if(isMgr()&&$('f_mad').value&&$('f_mad').value!==old.madrich){const mu=userBy($('f_mad').value);body.madrich=$('f_mad').value;if(mu&&snifsOf(mu,true)[0])body.snif=snifsOf(mu,true)[0]}
+    if(editId){if(isMgr()&&$('f_mad').value!==(old.madrich||'')){const mu=userBy($('f_mad').value);body.madrich=$('f_mad').value;if(mu&&snifsOf(mu,true)[0])body.snif=snifsOf(mu,true)[0]}
       await cKids.doc(editId).update(body)}
     else await cKids.doc().set(Object.assign(body,{program:nach?body.program:'snif',madrich:me.username,snif:mySnifs()[0]||'',log:{},created:new Date().toISOString()}));
     $('dlg').close();toast('נשמר ✓')}
@@ -1527,9 +1546,9 @@ function startSubs(){
     if(fresh(snap)){uOk=true;usersReady=true;ready()}else if(users.length)usersReady=true;
     restore();maybeBackfill();renderAll();
   },fail));
-  unsubs.push(cOlim.onSnapshot(snap=>{olim=snap.docs.map(d=>Object.assign({_id:d.id},d.data())).filter(o=>!o.archived);if(me)renderAll()},()=>{}));
+  unsubs.push(cOlim.onSnapshot(snap=>{olimAll=snap.docs.map(d=>Object.assign({_id:d.id},d.data()));olim=olimAll.filter(o=>!o.archived);if(me)renderAll()},()=>{}));
   unsubs.push(cKids.onSnapshot(snap=>{
-    kids=snap.docs.map(d=>Object.assign({_id:d.id},d.data())).filter(k=>!k.archived);
+    kidsAll=snap.docs.map(d=>Object.assign({_id:d.id},d.data()));kids=kidsAll.filter(k=>!k.archived);
     if(fresh(snap)){kOk=true;kidsLoaded=true;ready()}
     renderAll();
   },fail));
@@ -1549,18 +1568,20 @@ async function autoFix(){
   const key=sn.join()+'|'+NAMED.join()+'|'+users.map(u=>u.username+':'+(u.shevet||'')).join()+'|'+kids.filter(k=>!k.madrich||!O.includes(norm(k.shevet))).map(k=>k._id+(k.shevet||'')).join()+'|'+olim.filter(o=>!O.includes(norm(o.shevet))).length;
   if(key===fixKey)return;fixKey=key;
   const load={};kids.forEach(k=>{if(k.madrich)load[k.madrich]=(load[k.madrich]||0)+1});
-  const ops=[];let fixed=0,assigned=0;
+  const ops=[];let fixed=0,assigned=0,moved=0;
   kids.filter(k=>sn.includes(norm(k.snif))).forEach(k=>{
-    const upd={};let sh=norm(k.shevet);
+    const upd={},id=k._id;let sh=norm(k.shevet);
     if(sh&&!O.includes(sh)){const g=toShevet(sh);if(g&&O.includes(g)){upd.shevet=g;sh=g;fixed++}}
+    const mu=userBy(k.madrich);
+    if(mu&&mu.role==='madrich'&&mu.shevet&&sh&&O.includes(sh)&&norm(mu.shevet)!==sh&&!isNach(k)){upd.madrich='';k={...k,madrich:''};moved++}
     if(!k.madrich&&sh&&!isNach(k)){const c=users.filter(u=>u.role==='madrich'&&snifsOf(u).includes(norm(k.snif))&&norm(u.shevet)===sh).sort((a,b)=>(load[a.username]||0)-(load[b.username]||0));
       if(c.length){upd.madrich=c[0].username;load[c[0].username]=(load[c[0].username]||0)+1;assigned++}}
-    if(Object.keys(upd).length)ops.push(()=>cKids.doc(k._id).update(upd));
+    if(Object.keys(upd).length)ops.push(()=>cKids.doc(id).update(upd));
   });
   olim.filter(o=>sn.includes(norm(o.snif))).forEach(o=>{const sh=norm(o.shevet);if(sh&&!O.includes(sh)){const g=toShevet(sh);if(g&&O.includes(g))ops.push(()=>cOlim.doc(o._id).update({shevet:g}))}});
   if(!ops.length)return;
   try{for(let i=0;i<ops.length;i+=20)await Promise.all(ops.slice(i,i+20).map(f=>f()));
-    if(fixed||assigned)toast((fixed?`${fixed} כיתות תורגמו לשבטים`:'')+(fixed&&assigned?' · ':'')+(assigned?`${assigned} חניכים שויכו למדריך השבט`:''))}catch(e){}
+    if(fixed||assigned)toast((fixed?`${fixed} כיתות תורגמו לשבטים`:'')+(fixed&&assigned?' · ':'')+(assigned?`${assigned} חניכים שויכו למדריך השבט`:'')+(moved?` · ${moved} חניכים הועברו ממדריך של שבט אחר`:''))}catch(e){}
 }
 function stopSubs(){unsubs.forEach(f=>{try{f()}catch(e){}});unsubs=[]}
 renderAuth();note('טוען…');
