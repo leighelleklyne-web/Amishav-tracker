@@ -290,7 +290,7 @@ body{background-image:radial-gradient(circle at 1px 1px,rgba(85,176,255,.13) 1px
           <button type="button" data-role="shmini" aria-pressed="false">שמיניסט/ית<small>מעקב על הסניף שלי</small></button>
           <button type="button" data-role="rakaz" aria-pressed="false">רכז/ת<small>כמה סניפים</small></button>
         </div></div>
-      <div class="regOnly hid" id="shvWrap"><label for="lShevet">השבט שלי</label><select id="lShevet"></select></div>
+      <div class="regOnly hid" id="shvWrap"><label for="lShevet">השבט שלי</label><select id="lShevet"></select><p class="hint hid" id="noQuota">הרכז/ת של הסניף עוד לא הגדיר/ה כמה מדריכים יש בכל שבט, ולכן עוד אי אפשר להירשם כמדריך בסניף הזה. פנו לרכז/ת.</p></div>
       <div class="regOnly" id="oneSnif"><label for="lSnif">סניף</label><select id="lSnif"></select><p class="hint hid" id="noSnif">עדיין אין סניפים ברשימה. הרכז/ת צריך/ה להירשם קודם ולהוסיף את הסניפים, ואז הסניף שלך יופיע כאן.</p></div>
       <div class="regOnly hid" id="manySnif"><label for="lSnifAdd">הסניפים שאני מרכז/ת</label>
         <div class="addRow"><input id="lSnifAdd" list="dlSnif" autocomplete="off" placeholder="שם סניף"><button type="button" id="lSnifBtn">הוספה</button></div>
@@ -335,7 +335,7 @@ body{background-image:radial-gradient(circle at 1px 1px,rgba(85,176,255,.13) 1px
     </div>
     <div class="week" data-week></div>
     <div class="howto card hid" id="howto"><div class="row"><b>איך עובדים עם האתר?</b><span class="sp"></span><button class="sm" id="howtoX">הבנתי, תודה</button></div>
-      <ol><li><b>מוסיפים סניפים</b> בלשונית צוות – ושולחים למדריכים את הקישור להרשמה.</li><li><b>מעלים את רשימת העולים</b> בלשונית איתור עולים – מי שלא מגיע נכנס אוטומטית באדום ומשויך למדריך של השבט.</li><li><b>המדריכים מעדכנים כל שבוע</b> – ואת רואה כאן ובלשוניות מדריכים ונחשון מי מגיע, מי לא, ומי עוד לא עודכן.</li></ol></div>
+      <ol><li><b>מוסיפים סניפים ומגדירים כמה מדריכים יש בכל שבט</b> בלשונית צוות – ורק אז שולחים למדריכים את הקישור להרשמה.</li><li><b>מעלים את רשימת העולים</b> בלשונית איתור עולים – מי שלא מגיע נכנס אוטומטית באדום ומשויך למדריך של השבט.</li><li><b>המדריכים מעדכנים כל שבוע</b> – ואת רואה כאן ובלשוניות מדריכים ונחשון מי מגיע, מי לא, ומי עוד לא עודכן.</li></ol></div>
     <p class="lead">כל סניף במבט אחד. המצב (ירוק / צהוב / אדום) הוא העדכון האחרון של כל חניך עד השבוע הנבחר.</p>
     <div class="scards" id="scards"></div>
   </section>
@@ -386,6 +386,12 @@ body{background-image:radial-gradient(circle at 1px 1px,rgba(85,176,255,.13) 1px
       <div class="chipEd" id="uSnifChips"></div>
     </div>
     <div id="reqBox"></div>
+    <div class="card hid" id="quotaBox" style="margin:14px 0;border:2px solid var(--sky)">
+      <b>כמה מדריכים יש בכל שבט?</b>
+      <p class="small" style="margin:2px 0 8px">מדריך יכול להירשם רק לשבט שיש בו מקום פנוי. כך אי אפשר "להתחזות" למדריך של שבט שכבר מלא. <b>עד שתגדירי מספרים לסניף – מדריכים לא יוכלו להירשם אליו.</b></p>
+      <div class="scroll"><table id="quotaTbl"></table></div>
+      <div class="row" style="margin-top:10px"><button class="pri" id="quotaSave">שמירת המכסות</button><span class="small" id="quotaMsg"></span></div>
+    </div>
     <div class="card hid" id="namedBox" style="margin:14px 0">
       <b>שמות השבטים הבוגרים (ט׳–י״ב)</b>
       <p class="small" style="margin:2px 0 8px">מכיתה ט׳ לכל שבט יש שם משלו. כאן רואים ומתקנים את השמות, מהצעיר (ט׳) לבוגר (י״ב). בנובמבר, בהחלפת השבטים, נוסף אוטומטית השם של שבט ט׳ החדש.</p>
@@ -608,6 +614,7 @@ function gradeToSh(v){
 }
 function toShevet(v){const q=qn(v);if(!q)return'';const hit=shOrder().find(x=>qn(x)===q);return hit||gradeToSh(v)}
 const shvSort=(a,b)=>{const O=shOrder(),i=O.indexOf(a),j=O.indexOf(b);return (i<0?99:i)-(j<0?99:j)||heSort(a,b)};
+let quotas={},slots={},slotsWritten='';
 let promos={},kidsLoaded=false,promoAuto=false,kidsAll=[],olimAll=[];
 let snifNames=[],metaLoaded=false,backfilled=false,cMeta=null,cOlim=null,olim=[],olSnif='',imRows=null,asId=null,imResult='';
 const drafts={};let cResets=null,resets=[],mode='local',fb=null,fbUser=null,registering=false,unsubs=[],uOk=false;
@@ -682,7 +689,10 @@ function renderAuth(){
   $('tLogin').setAttribute('aria-pressed',!reg);$('tReg').setAttribute('aria-pressed',reg);
   document.querySelectorAll('.regOnly').forEach(e=>e.classList.toggle('hid',!reg));
   if(reg){$('oneSnif').classList.toggle('hid',regRole==='rakaz');$('manySnif').classList.toggle('hid',regRole!=='rakaz');$('shvWrap').classList.toggle('hid',regRole!=='madrich')}
-  {const v=$('lShevet').value;$('lShevet').innerHTML='<option value="">בחרו שבט…</option>'+allSh().map(x=>`<option value="${esc(x)}">${shOpt(x)}</option>`).join('');$('lShevet').value=v}
+  {const v=$('lShevet').value,sn=norm($('lSnif').value),av=allSh().filter(x=>!sn||quotaOf(sn,x)>0);
+   $('lShevet').innerHTML='<option value="">'+(sn&&!av.length?'אין עדיין שבטים פתוחים בסניף':'בחרו שבט…')+'</option>'+av.map(x=>{const full=sn&&usedOf(sn,x)>=quotaOf(sn,x);return `<option value="${esc(x)}" ${full?'disabled':''}>${shOpt(x)}${full?' – מלא':''}</option>`}).join('');
+   if([...$('lShevet').options].some(o=>o.value===v&&!o.disabled))$('lShevet').value=v;
+   $('noQuota').classList.toggle('hid',!(reg&&regRole==='madrich'&&sn&&!av.length));}
   document.querySelectorAll('[data-role]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.role===regRole));
   $('lBtn').textContent=comp?'סיום הרשמה':reg?'הרשמה וכניסה':fg?(mode==='firebase'?'שליחת מייל לאיפוס':'שליחת בקשה לאיפוס'):'כניסה';
   document.querySelector('p.forgotOnly').textContent=mode==='firebase'?'כתבו את האימייל שאיתו נרשמתם, ונשלח אליו קישור לבחירת סיסמה חדשה.':'כתבו את האימייל שאיתו נרשמתם. הבקשה תגיע לרכז/ת או לשמיניסט/ית של הסניף, והם יקבעו לכם סיסמה זמנית ויעבירו לכם אותה. בכניסה הבאה תתבקשו לבחור סיסמה חדשה.';
@@ -703,6 +713,22 @@ $('tLogin').addEventListener('click',()=>setMode('login'));
 $('tReg').addEventListener('click',()=>setMode('reg'));
 $('forgot').addEventListener('click',()=>{if(authMode==='complete'){if(fb)fb.signOut();setMode('login');return}setMode(authMode==='forgot'?'login':'forgot')});
 const regShevet=()=>regRole==='madrich'?norm($('lShevet').value):'';
+// מכסות: כמה מדריכים יש לכל שבט בכל סניף (הרכזת קובעת). slots = כמה כבר רשומים (מתעדכן על ידי הרכזת, בלי פרטים אישיים)
+const quotaOf=(sn,sh)=>+(((quotas[sn]||{})[sh])||0);
+const usedOf=(sn,sh)=>+(((slots[sn]||{})[sh])||0);
+function quotaErr(sn,sh){
+  if(!Object.keys(quotas[sn]||{}).some(k=>quotaOf(sn,k)>0))return'הרכז/ת של הסניף עוד לא הגדיר/ה כמה מדריכים יש בכל שבט. אי אפשר להירשם כמדריך עד שזה יוגדר – פנו לרכז/ת.';
+  const q=quotaOf(sn,sh);if(!q)return`בסניף ${sn} לא מוגדרים מדריכים לשבט ${sh}. בדקו שבחרתם את השבט הנכון, או פנו לרכז/ת.`;
+  if(usedOf(sn,sh)>=q)return`בשבט ${sh} בסניף ${sn} כבר רשומים כל המדריכים (${q}). אם זו טעות – פנו לרכז/ת.`;
+  return'';
+}
+// בדיקה סופית אחרי ההתחברות – סופרת את המדריכים שבאמת רשומים
+async function slotTaken(sn,sh,em){
+  let list=users;
+  try{if(mode==='firebase'){const sp=await cUsers.get();list=sp.docs.map(d=>Object.assign({},d.data(),{username:d.id}))}}catch(e){}
+  const n=list.filter(u=>u.role==='madrich'&&snifsOf(u,true).includes(sn)&&norm(u.shevet)===sh&&u.username!==em).length;
+  return n>=quotaOf(sn,sh)?`בשבט ${sh} בסניף ${sn} כבר רשומים כל המדריכים (${quotaOf(sn,sh)}). אם זו טעות – פנו לרכז/ת.`:'';
+}
 function regForm(){
   const name=norm($('lName').value);
   if(regRole==='rakaz'&&norm($('lSnifAdd').value))chipAdd($('lSnifAdd'),$('lSnifChips'),regSnifs);
@@ -711,6 +737,7 @@ function regForm(){
   if(!snifim.length)return{err:regRole==='rakaz'?'הוסיפו לפחות סניף אחד':(snifNames.length?'בחרו סניף':'עדיין אין סניפים – הרכז/ת צריך/ה להירשם קודם')};
   if(regRole!=='rakaz'&&!snifNames.includes(snifim[0]))return{err:'בחרו סניף מהרשימה'};
   if(regRole==='madrich'&&!regShevet())return{err:'בחרו את השבט שלך'};
+  if(regRole==='madrich'){const q=quotaErr(snifim[0],regShevet());if(q)return{err:q}}
   return{name,snifim};
 }
 $('gBtn').addEventListener('click',async()=>{
@@ -721,6 +748,7 @@ $('gBtn').addEventListener('click',async()=>{
     try{const c=await fb.signInWithPopup(pr),gu=(c&&c.user)||fb.currentUser,em=String(gu.email||'').toLowerCase();
       const ex=await cUsers.doc(em).get();
       if(ex.exists){toast('כבר יש לך חשבון – נכנסת אליו')}
+      else if(regRole==='madrich'&&await slotTaken(f.snifim[0],regShevet(),em)){const t=await slotTaken(f.snifim[0],regShevet(),em);try{await gu.delete()}catch(e){try{await fb.signOut()}catch(_){}}$('lErr').textContent=t}
       else{await cUsers.doc(em).set({username:em,email:em,uid:gu.uid,name:f.name,role:regRole,snifim:f.snifim,shevet:regShevet(),created:new Date().toISOString()});
         if(regRole==='rakaz')await publishSnifim([...snifNames,...f.snifim]);
         location.hash=['rakaz','shmini'].includes(regRole)?'overview':'mine'}}
@@ -734,6 +762,7 @@ $('gBtn').addEventListener('click',async()=>{
     else if(x&&x.code==='auth/operation-not-allowed')$('lErr').textContent='כניסה עם Google עוד לא הופעלה ב-Firebase';
     else if(x&&!['auth/popup-closed-by-user','auth/cancelled-popup-request'].includes(x.code))$('lErr').textContent=fbErr(x)}
 });
+$('lSnif').addEventListener('change',renderAuth);
 $('roleBtns').addEventListener('click',e=>{const b=e.target.closest('[data-role]');if(b){regRole=b.dataset.role;renderAuth()}});
 $('lSnifBtn').addEventListener('click',()=>chipAdd($('lSnifAdd'),$('lSnifChips'),regSnifs));
 $('lSnifAdd').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();chipAdd($('lSnifAdd'),$('lSnifChips'),regSnifs)}});
@@ -759,8 +788,10 @@ $('loginF').addEventListener('submit',async e=>{
     if(!snifim.length)return err(regRole==='rakaz'?'הוסיפו לפחות סניף אחד':(snifNames.length?'בחרו סניף':'עדיין אין סניפים – הרכז/ת צריך/ה להירשם קודם'));
     if(regRole!=='rakaz'&&!snifNames.includes(snifim[0]))return err('בחרו סניף מהרשימה');
     if(regRole==='madrich'&&!regShevet())return err('בחרו את השבט שלך');
+    if(regRole==='madrich'){const q=quotaErr(snifim[0],regShevet());if(q)return err(q)}
     const em=String(fbUser.email||'').toLowerCase();registering=true;$('lBtn').disabled=true;
-    try{await cUsers.doc(em).set({username:em,email:em,uid:fbUser.uid,name,role:regRole,snifim,shevet:regShevet(),created:new Date().toISOString()});
+    try{if(regRole==='madrich'){const t=await slotTaken(snifim[0],regShevet(),em);if(t){err(t);return}}
+      await cUsers.doc(em).set({username:em,email:em,uid:fbUser.uid,name,role:regRole,snifim,shevet:regShevet(),created:new Date().toISOString()});
       if(regRole==='rakaz')await publishSnifim([...snifNames,...snifim]);
       authMode='login';location.hash=['rakaz','shmini'].includes(regRole)?'overview':'mine'}
     catch(x){err('לא הצלחנו לשמור. נסו שוב')}
@@ -775,12 +806,14 @@ $('loginF').addEventListener('submit',async e=>{
     if(!snifim.length)return err(regRole==='rakaz'?'הוסיפו לפחות סניף אחד':(snifNames.length?'בחרו סניף':'עדיין אין סניפים – הרכז/ת צריך/ה להירשם קודם'));
     if(regRole!=='rakaz'&&!snifNames.includes(snifim[0]))return err('בחרו סניף מהרשימה');
     if(regRole==='madrich'&&!regShevet())return err('בחרו את השבט שלך');
+    if(regRole==='madrich'){const q=quotaErr(snifim[0],regShevet());if(q)return err(q)}
     if(!okUser(u))return err('כתובת אימייל לא תקינה (אותיות באנגלית, ספרות, נקודה, מקף או +)');
     if(mode!=='firebase'&&userBy(u))return err('האימייל הזה כבר רשום – עברו ללשונית "כניסה"');
     if(!pwOk(p))return err('הסיסמה לא עומדת בכל הדרישות שברשימה');
     if(mode==='firebase'){
       registering=true;$('lBtn').disabled=true;
       try{const c=await fb.createUserWithEmailAndPassword(u,p);
+        if(regRole==='madrich'){const t=await slotTaken(snifim[0],regShevet(),u);if(t){try{await c.user.delete()}catch(e){}err(t);return}}
         await cUsers.doc(u).set({username:u,email:u,uid:c.user.uid,name,role:regRole,snifim,shevet:regShevet(),created:new Date().toISOString()});
         if(regRole==='rakaz')await publishSnifim([...snifNames,...snifim]);
         $('lPass').value='';location.hash=['rakaz','shmini'].includes(regRole)?'overview':'mine';}
@@ -788,6 +821,7 @@ $('loginF').addEventListener('submit',async e=>{
       finally{registering=false;$('lBtn').disabled=false;restore();renderAll()}
       return;
     }
+    if(regRole==='madrich'){const t=await slotTaken(snifim[0],regShevet(),u);if(t)return err(t)}
     const salt=newSalt(),h=await hash(salt,p),doc={username:u,email:u,name,role:regRole,snifim,shevet:regShevet(),salt,hash:h,created:new Date().toISOString()};
     try{await cUsers.doc(u).set(doc)}catch(x){return err('לא הצלחנו לשמור. ודאו שקיבלתם הרשאת Contributor לעמוד.')}
     if(regRole==='rakaz')await publishSnifim([...snifNames,...snifim]);
@@ -1023,6 +1057,12 @@ function renderUsers(){
   $('resetBox').classList.toggle('hid',!OWNERS.includes(me.username));
   $('allSnifBox').classList.toggle('hid',!OWNERS.includes(me.username));
   $('namedBox').classList.toggle('hid',!canEd);
+  $('quotaBox').classList.toggle('hid',!canEd);
+  if(canEd&&!$('quotaBox').contains(document.activeElement)){const sns=snifsOf(me,true);
+    const used=(sn,sh)=>users.filter(u=>u.role==='madrich'&&snifsOf(u,true).includes(sn)&&norm(u.shevet)===sh).length;
+    $('quotaTbl').innerHTML=`<thead><tr><th>שבט</th>${sns.map(x=>`<th>${esc(x)}</th>`).join('')}</tr></thead><tbody>${allSh().map(sh=>`<tr><td><b>${shOpt(sh)}</b></td>${sns.map(sn=>{const u=used(sn,sh),q=quotaOf(sn,sh);
+      return `<td><input type="number" min="0" max="20" inputmode="numeric" data-q="${esc(sn)}|${esc(sh)}" value="${q||''}" placeholder="0" style="width:70px;min-height:38px;padding:4px 8px"> <span class="small" style="${u>q?'color:var(--r);font-weight:700':''}">רשומים ${u}${u>q?' – יותר מהמכסה':''}</span></td>`}).join('')}</tr>`).join('')}</tbody>`;
+    if(!sns.some(sn=>Object.keys(quotas[sn]||{}).some(k=>quotaOf(sn,k)>0)))$('quotaMsg').innerHTML='<b style="color:var(--r)">עוד לא הוגדרו מכסות – מדריכים לא יכולים להירשם.</b>';else $('quotaMsg').textContent='';}
   $('namedChips').innerHTML=NAMED.map((x,j)=>`<span>${esc(x)} <small style="font-weight:400;color:var(--mut)">(${NAMED_GRADES[j]||'?'})</small><button type="button" data-nrm="${j}" aria-label="הסרת ${esc(x)}">×</button></span>`).join('')||'<span class="small" style="background:none">אין עדיין</span>';
   if(OWNERS.includes(me.username)){const all=[...new Set([...snifNames,...users.filter(u=>u.role==='rakaz'||u.role==='admin').flatMap(u=>snifsOf(u,true))])].sort(heSort);
     $('allSnifChips').innerHTML=all.length?all.map(x=>{const rk=users.filter(u=>(u.role==='rakaz'||u.role==='admin')&&snifsOf(u,true).includes(x)).map(u=>u.name);
@@ -1077,6 +1117,19 @@ $('uSnifChips').addEventListener('click',async e=>{const b=e.target.closest('[da
   if(b.dataset.sure!=='1'){b.dataset.sure='1';b.textContent='להסיר?';return}
   if(await saveMySnifim(snifsOf(me,true).filter(x=>x!==b.dataset.urm)))toast(`סניף ${b.dataset.urm} הוסר מהרשימה שלך`)});
 
+$('quotaSave').addEventListener('click',async()=>{
+  const q=JSON.parse(JSON.stringify(quotas||{}));
+  document.querySelectorAll('[data-q]').forEach(i=>{const [sn,sh]=i.dataset.q.split('|');const n=Math.max(0,Math.min(20,parseInt(i.value)||0));q[sn]=q[sn]||{};if(n)q[sn][sh]=n;else delete q[sn][sh]});
+  try{await cMeta.doc('quotas').set(q);$('quotaBox').querySelector('input')&&document.activeElement.blur();toast('המכסות נשמרו – מדריכים יכולים להירשם לשבטים שהוגדרו')}catch(x){toast(mode==='firebase'?fbErr(x):'השמירה נכשלה')}
+});
+// הרכזת מעדכנת ספירה ציבורית (בלי שמות) של כמה מדריכים רשומים בכל שבט – כדי שבהרשמה יופיע "מלא"
+async function syncSlots(){
+  if(!(me&&(me.role==='rakaz'||me.role==='admin'))||!metaLoaded||!uOk)return;
+  const nx=JSON.parse(JSON.stringify(slots||{}));
+  snifsOf(me,true).forEach(sn=>{nx[sn]={};users.filter(u=>u.role==='madrich'&&snifsOf(u,true).includes(sn)&&u.shevet).forEach(u=>{nx[sn][u.shevet]=(nx[sn][u.shevet]||0)+1})});
+  const j=JSON.stringify(nx);if(j===JSON.stringify(slots)||j===slotsWritten)return;slotsWritten=j;
+  try{await cMeta.doc('slots').set(nx)}catch(e){}
+}
 async function saveNamed(list){try{await cMeta.doc('shevatim').set(Object.assign({},shvDoc||{},{named:list.slice(0,NAMED_GRADES.length)}));toast('נשמר')}catch(x){toast(mode==='firebase'?fbErr(x):'השמירה נכשלה')}}
 $('namedBtn').addEventListener('click',()=>{const v=norm($('namedAdd').value);if(!v)return;if(shOrder().includes(v)){toast('השם כבר קיים');return}
   if(NAMED.length>=NAMED_GRADES.length){toast('יש כבר 4 שבטים בוגרים (ט׳–י״ב)');return}saveNamed([...NAMED,v]);$('namedAdd').value=''});
@@ -1103,7 +1156,7 @@ $('rsBtn').addEventListener('click',async()=>{
     step='מחיקת החניכים';await del(cKids,kidsAll.map(k=>k._id));
     step='מחיקת רשימת העולים';await del(cOlim,olimAll.map(o=>o._id));
     step='מחיקת אנשי הצוות';await del(cUsers,users.map(u=>u.username).filter(u=>u!==mine));
-    step='מחיקת רשימת הסניפים';await cMeta.doc('snifim').delete();await cMeta.doc('promotions').delete();await cMeta.doc('shevatim').delete();
+    step='מחיקת רשימת הסניפים';await cMeta.doc('snifim').delete();await cMeta.doc('promotions').delete();await cMeta.doc('shevatim').delete();await cMeta.doc('quotas').delete();await cMeta.doc('slots').delete();
     if(mode!=='firebase')await del(cResets,resets.map(r=>r.email));
     step='מחיקת החשבון שלך';await cUsers.doc(mine).delete();
     if(mode==='firebase')await fb.currentUser.delete();
@@ -1561,7 +1614,7 @@ function renderHero(){
 
 function renderAll(){
   route();if(!me){renderAuth();return}
-  $('editSnifs').classList.toggle('hid',me.role==='shmini');renderWeekBars();renderHero();renderMine();renderOver();renderTrack();renderUsers();renderOlim();maybePromo();maybeLeave();autoFix();
+  $('editSnifs').classList.toggle('hid',me.role==='shmini');renderWeekBars();renderHero();renderMine();renderOver();renderTrack();renderUsers();renderOlim();maybePromo();maybeLeave();syncSlots();autoFix();
 }
 
 const LOCAL_MSG='שימו לב: האתר עדיין לא מחובר למסד נתונים משותף, ולכן מה שמוזן כאן נשמר רק במכשיר ובדפדפן הזה. אחרי החיבור ל-Firebase כל הצוות יראה את אותם נתונים.';
@@ -1573,6 +1626,7 @@ function localDb(){
   const merge=(a,b)=>{for(const k in b){if(b[k]&&typeof b[k]==='object'&&!Array.isArray(b[k])&&a[k]&&typeof a[k]==='object')merge(a[k],b[k]);else a[k]=clone(b[k])}return a};
   const col=p=>({doc:id=>{id=id||(Date.now().toString(36)+Math.random().toString(36).slice(2,8));const k=p+'/'+id;return{id,
       set:async d=>{S[k]=clone(d);setTimeout(emit)},update:async d=>{if(!S[k])throw{code:'invalid_argument'};merge(S[k],d);setTimeout(emit)},delete:async()=>{delete S[k];setTimeout(emit)}}},
+    get:async()=>{const docs=Object.keys(S).filter(k=>k.startsWith(p+'/')).map(k=>({id:k.slice(p.length+1),exists:true,data:()=>clone(S[k])}));return{docs,size:docs.length,empty:!docs.length}},
     onSnapshot:n=>{const f=()=>{const docs=Object.keys(S).filter(k=>k.startsWith(p+'/')).map(k=>({id:k.slice(p.length+1),exists:true,data:()=>clone(S[k])}));n({docs,size:docs.length,empty:!docs.length,metadata:{fromCache:false}})};L.push(f);setTimeout(f);return()=>{}}});
   return{collection:col};
 }
@@ -1640,6 +1694,7 @@ renderAuth();note('טוען…');
   if(!db){note('אי אפשר להתחבר למאגר הנתונים בתצוגה הזו. פתחו את העמוד כשאתם מחוברים ל-Claude.');return}
   cKids=db.collection('chanichim');cUsers=db.collection('users');cResets=db.collection('resets');cMeta=db.collection('meta');cOlim=db.collection('olim');
   cMeta.onSnapshot(snap=>{const d=snap.docs.find(x=>x.id==='snifim');snifNames=d?((d.data()||{}).names||[]):[];const pd=snap.docs.find(x=>x.id==='promotions');promos=pd?(pd.data()||{}):{};
+    const qd=snap.docs.find(x=>x.id==='quotas');quotas=qd?(qd.data()||{}):{};const sd2=snap.docs.find(x=>x.id==='slots');slots=sd2?(sd2.data()||{}):{};
     const sd=snap.docs.find(x=>x.id==='shevatim');shvDoc=sd?(sd.data()||{}):null;if(shvDoc&&Array.isArray(shvDoc.named))NAMED=shvDoc.named.slice();metaLoaded=true;renderAuth();maybeBackfill();if(me)renderAll()},()=>{metaLoaded=true;renderAuth()});
   if(mode==='firebase'){
     usersReady=true;note('');renderAll();
