@@ -212,6 +212,14 @@ header.top{background:#fff;color:var(--ink);box-shadow:0 1px 0 var(--line),0 4px
 .total{background:#e3f1ff;color:var(--ink)}.total .schead{background:var(--sky);border:0}.total .schead h3,.total .schead .small{color:#fff}
 .total .sbar{background:#fff}.total .leg span.t{color:var(--mut)}
 .week button{color:#fff}
+.redrow td{background:#fff1f1}
+.pillst{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:3px 12px;font-size:13px;font-weight:700;white-space:nowrap}
+.pillst.ok{background:#e8f7ea;color:#1d6b2c}.pillst.no{background:#ffe1e1;color:#b3261e}
+.upl{border:2px dashed var(--sky);border-radius:12px;padding:18px;text-align:center;background:var(--soft);cursor:pointer}
+.upl input{display:none}
+.maptbl td,.maptbl th{padding:6px 8px}
+.maptbl select{min-height:38px;padding:4px 8px}
+.shv.red{border-top-color:var(--r)}
 @media(prefers-reduced-motion:reduce){.toast,.kid{transition:none}.kid:hover{transform:none}}
 @media(max-width:900px){.bento{grid-template-columns:1fr 1fr}.bento .tile:first-child{grid-column:1/-1}.lgrid{grid-template-columns:1fr}.lgrid .ltiles{order:-1}}
 @media(max-width:600px){.ltiles .tile.sky .deco{display:none}.ltiles .tile.sky h2,.ltiles .tile.sky p{max-width:none}.tile{min-height:120px;padding:18px}.ltiles .tile.sky{min-height:220px}.ltiles .tile:not(.sky){display:none}.me #meName{display:none}.brand span{display:none}}
@@ -307,6 +315,21 @@ header.top{background:#fff;color:var(--ink);box-shadow:0 1px 0 var(--line),0 4px
     <div id="groups"></div>
   </section>
 
+  <!-- RAKAZ: olim roster -->
+  <section id="vOlim" class="hid">
+    <div class="row"><h2 id="oTitle2">רשימת עולים</h2><span class="sp"></span><button id="olCsv">הורדה ל-CSV</button></div>
+    <p class="small" style="margin:4px 0 12px">מעלים קובץ אקסל של העולים באזור, והאתר משווה אותו לחניכים שכבר במערכת. מי שלא מגיע/ה מסומן/ת באדום. עולים מלפני יותר מ-10 שנים לא נכללים.</p>
+    <label class="upl" id="olDrop"><input type="file" id="olFile" accept=".xlsx,.csv,.txt"><b>📄 העלאת קובץ אקסל (xlsx) או CSV</b><br><span class="small">לחצו לבחירת קובץ, או גררו אותו לכאן</span></label>
+    <div class="chips" id="olSnifChips"></div>
+    <div class="row" style="margin-top:12px">
+      <div style="flex:1 1 200px"><label for="olQ">חיפוש</label><input id="olQ" placeholder="שם, ארץ, הורים…"></div>
+      <div style="flex:0 1 170px"><label for="olSh">שבט</label><select id="olSh"></select></div>
+      <div style="flex:0 1 210px"><label for="olSt">מצב</label><select id="olSt"><option value="">הכול</option><option value="in">נמצאים במערכת ומגיעים</option><option value="out">לא מגיעים (אדום)</option></select></div>
+    </div>
+    <div id="olSum" style="margin-top:14px"></div>
+    <div id="olList" style="margin-top:14px"></div>
+  </section>
+
   <!-- RAKAZ: users -->
   <section id="vUsers" class="hid">
     <h2>הצוות בסניפים שלי</h2>
@@ -340,6 +363,30 @@ header.top{background:#fff;color:var(--ink);box-shadow:0 1px 0 var(--line),0 4px
 <datalist id="dlSnif"></datalist>
 
 <!-- chanich details -->
+<dialog id="imDlg"><div class="in">
+  <div class="row"><h2>ייבוא רשימת עולים</h2><span class="sp"></span><button class="sm" data-close>ביטול</button></div>
+  <p class="small" id="imInfo"></p>
+  <div class="grid" style="margin:10px 0">
+    <div><label for="imSnif">לאיזה סניף לייבא?</label><select id="imSnif"></select></div>
+    <div><label for="imYears">לא לכלול עולים מלפני יותר מ־</label><select id="imYears"><option value="10" selected>10 שנים</option><option value="0">לכלול את כולם</option></select></div>
+  </div>
+  <b>איזו עמודה בקובץ היא מה?</b>
+  <div class="scroll"><table class="maptbl" id="imMap"></table></div>
+  <b style="display:block;margin-top:12px">תצוגה מקדימה</b>
+  <div class="scroll"><table id="imPrev"></table></div>
+  <div class="err" id="imErr"></div>
+  <div class="row" style="margin-top:12px"><button class="pri" id="imGo">ייבוא</button><span class="small" id="imCount"></span></div>
+</div></dialog>
+<dialog id="asDlg"><form id="asFrm">
+  <h2 id="asT">שיוך למדריך</h2>
+  <div class="grid">
+    <div><label for="asMad">מדריך / נחשוניסט</label><select id="asMad"></select></div>
+    <div id="asPrWrap" class="hid"><label for="asPr">מסגרת</label><select id="asPr"><option value="moadonit">מועדונית</option><option value="ach">אח גדול</option></select></div>
+  </div>
+  <div class="err" id="asErr"></div>
+  <div class="row" style="margin-top:14px"><button class="pri" type="submit">שיוך והוספה למעקב</button><button type="button" data-close>ביטול</button></div>
+</form></dialog>
+
 <dialog id="dlg"><form id="frm">
   <h2 id="dlgT">חניך/ה חדש/ה</h2>
   <div class="grid">
@@ -451,7 +498,7 @@ let db=null,cKids=null,cUsers=null,kids=[],users=[],usersReady=false,me=null,sni
 const OWNERS=['tfutzot@bna.org.il','leighelleklyne@gmail.com'];
 const SHEVATIM=['רגבים','זרעים','נבטים','ניצנים','מעלות','הרא"ה','קדם'];
 const shvSort=(a,b)=>{const i=SHEVATIM.indexOf(a),j=SHEVATIM.indexOf(b);return (i<0?99:i)-(j<0?99:j)||heSort(a,b)};
-let snifNames=[],metaLoaded=false,backfilled=false,cMeta=null;
+let snifNames=[],metaLoaded=false,backfilled=false,cMeta=null,cOlim=null,olim=[],olSnif='',imRows=null,asId=null;
 const drafts={};let cResets=null,resets=[],mode='local',fb=null,fbUser=null,registering=false,unsubs=[],uOk=false;
 const FBV='10.14.1',loadScript=src=>new Promise((ok,no)=>{const t=document.createElement('script');t.src=src;t.onload=ok;t.onerror=no;document.head.appendChild(t)});
 const fbErr=x=>({'auth/email-already-in-use':'האימייל הזה כבר רשום – עברו ללשונית "כניסה"','auth/invalid-email':'כתובת אימייל לא תקינה','auth/weak-password':'הסיסמה חלשה מדי','auth/network-request-failed':'אין חיבור לאינטרנט','auth/too-many-requests':'יותר מדי ניסיונות. נסו שוב בעוד כמה דקות','auth/requires-recent-login':'מטעמי אבטחה צריך לצאת, להיכנס שוב ולנסות שוב','permission-denied':'אין הרשאה לפעולה הזו – כנראה שכללי האבטחה ב-Firebase לא מעודכנים'}[x&&x.code]||('משהו השתבש, נסו שוב'+(x&&x.code?' ('+x.code+')':'')));
@@ -480,7 +527,7 @@ function chipAdd(inp,el,arr){const v=norm(inp.value);if(v&&!arr.includes(v))arr.
 function tabsFor(){
   if(!me)return[];
   if(isMgr()){const sn=mySnifs(),n=resets.filter(r=>r.email!==me.username&&userBy(r.email)&&snifsOf(userBy(r.email)).some(s=>sn.includes(s))).length;
-    return[['overview','תמונת מצב'],['track','מעקב מדריכים'],['nachshon','מעקב נחשון'],['users','צוות'+(n?` (${n})`:'')]]}
+    return[['overview','תמונת מצב'],['track','מעקב מדריכים'],['nachshon','מעקב נחשון'],['olim','עולים'],['users','צוות'+(n?` (${n})`:'')]]}
   return[['mine',me.role==='nachshon'?'החניכים שלי בנחשון':'החניכים שלי']];
 }
 let cur='';
@@ -496,6 +543,7 @@ function route(){
   $('vOver').classList.toggle('hid',!logged||cur!=='overview');
   $('vTrack').classList.toggle('hid',!logged||(cur!=='track'&&cur!=='nachshon'));
   $('vUsers').classList.toggle('hid',!logged||cur!=='users');
+  $('vOlim').classList.toggle('hid',!logged||cur!=='olim');
 }
 addEventListener('hashchange',renderAll);
 
@@ -923,6 +971,175 @@ $('rsBtn').addEventListener('click',async()=>{
   finally{registering=false;b.disabled=false}
 });
 
+/* ---------- olim roster: file reading ---------- */
+async function inflateRaw(u8){const ds=new DecompressionStream('deflate-raw');const st=new Blob([u8]).stream().pipeThrough(ds);return new Uint8Array(await new Response(st).arrayBuffer())}
+async function unzip(buf){
+  const u8=new Uint8Array(buf),dv=new DataView(buf),files={};let e=u8.length-22;
+  while(e>=0&&dv.getUint32(e,true)!==0x06054b50)e--;if(e<0)throw new Error('zip');
+  let p=dv.getUint32(e+16,true);const n=dv.getUint16(e+10,true);
+  for(let i=0;i<n;i++){
+    const meth=dv.getUint16(p+10,true),csz=dv.getUint32(p+20,true),nl=dv.getUint16(p+28,true),xl=dv.getUint16(p+30,true),cl=dv.getUint16(p+32,true),off=dv.getUint32(p+42,true);
+    const name=new TextDecoder().decode(u8.subarray(p+46,p+46+nl));
+    files[name]={meth,csz,off};p+=46+nl+xl+cl}
+  return{async text(name){const f=files[name];if(!f)return null;const ln=dv.getUint16(f.off+26,true),lx=dv.getUint16(f.off+28,true),st=f.off+30+ln+lx;
+      const raw=u8.subarray(st,st+f.csz);return new TextDecoder().decode(f.meth===8?await inflateRaw(raw):raw)},names:Object.keys(files)};
+}
+async function readXlsx(buf){
+  const z=await unzip(buf),P=x=>new DOMParser().parseFromString(x,'application/xml');
+  const ss=[];const sx=await z.text('xl/sharedStrings.xml');
+  if(sx)P(sx).querySelectorAll('si').forEach(si=>ss.push([...si.getElementsByTagName('t')].map(t=>t.textContent).join('')));
+  let sheet='xl/worksheets/sheet1.xml';
+  const wb=await z.text('xl/workbook.xml'),rels=await z.text('xl/_rels/workbook.xml.rels');
+  if(wb&&rels){const first=P(wb).getElementsByTagName('sheet')[0];const rid=first&&(first.getAttribute('r:id')||first.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships','id'));
+    const rel=[...P(rels).getElementsByTagName('Relationship')].find(r=>r.getAttribute('Id')===rid);
+    if(rel){let t=rel.getAttribute('Target');sheet=t.startsWith('/')?t.slice(1):'xl/'+t.replace(/^\.\//,'')}}
+  if(!z.names.includes(sheet))sheet=z.names.find(x=>/^xl\/worksheets\/[^/]+\.xml$/.test(x));
+  const doc=P(await z.text(sheet)),rows=[];
+  const col=r=>{let c=0;for(const ch of r.replace(/\d+/g,''))c=c*26+ch.charCodeAt(0)-64;return c-1};
+  [...doc.getElementsByTagName('row')].forEach(row=>{const out=[];
+    [...row.getElementsByTagName('c')].forEach(c=>{const t=c.getAttribute('t'),v=c.getElementsByTagName('v')[0];let val='';
+      if(t==='s')val=ss[+(v&&v.textContent)]||'';else if(t==='inlineStr')val=[...c.getElementsByTagName('t')].map(x=>x.textContent).join('');
+      else if(v)val=t==='str'||t==='b'?v.textContent:(isNaN(+v.textContent)?v.textContent:+v.textContent);
+      out[col(c.getAttribute('r')||'A1')]=val});
+    rows.push(Array.from(out,x=>x??''))});
+  return rows;
+}
+function readCsv(txt){
+  txt=txt.replace(/^﻿/,'');const first=txt.split(/\r?\n/)[0]||'';
+  const sep=[',',';','\t'].sort((a,b)=>first.split(b).length-first.split(a).length)[0];
+  const rows=[];let row=[],f='',q=false;
+  for(let i=0;i<txt.length;i++){const c=txt[i];
+    if(q){if(c==='"'){if(txt[i+1]==='"'){f+='"';i++}else q=false}else f+=c}
+    else if(c==='"')q=true;else if(c===sep){row.push(f);f=''}else if(c==='\n'||c==='\r'){if(c==='\r'&&txt[i+1]==='\n')i++;row.push(f);rows.push(row);row=[];f=''}else f+=c}
+  if(f||row.length){row.push(f);rows.push(row)}
+  return rows;
+}
+const OLF=[['name','שם החניך/ה (או שם פרטי)',['שם מלא','שם החניך','שם התלמיד','שם הילד','שם פרטי','שם']],['last','שם משפחה (אם בעמודה נפרדת)',['שם משפחה']],
+  ['shevet','שבט',['שבט']],['phone','טלפון חניך',['טלפון חניך','נייד חניך','טלפון תלמיד','נייד','טלפון']],['parents','שם ההורים',['שם ההורים','שם הורה','הורים','שם האם','שם האב']],
+  ['pphone','טלפון הורים',['טלפון הורים','טלפון הורה','טלפון אם','טלפון אב','נייד הורה']],['address','כתובת',['כתובת','רחוב','מגורים']],
+  ['origin','מאיפה עלו',['ארץ מוצא','מאיפה','ארץ','מדינה','עלו מ']],['year','שנת / תאריך עלייה',['שנת עלייה','שנת עליה','תאריך עלייה','תאריך עליה','עלייה','עליה']],['snif','סניף',['סניף']]];
+function aliyahDate(v){
+  if(v===''||v==null)return null;
+  if(typeof v==='number'){if(v>=1900&&v<=2100)return new Date(v,6,1);if(v>20000&&v<80000)return new Date(Math.round((v-25569)*864e5));return null}
+  const t=String(v).trim();let m=t.match(/(\d{1,2})[./-](\d{1,2})[./-](\d{4}|\d{2})/);
+  if(m){let y=+m[3];if(y<100)y+=y>(new Date().getFullYear()%100)?1900:2000;return new Date(y,+m[2]-1,+m[1])}
+  m=t.match(/(19|20)\d{2}/);return m?new Date(+m[0],6,1):null;
+}
+const olNorm=x=>String(x||'').replace(/["'״׳`]/g,'').replace(/\s+/g,' ').trim().toLowerCase();
+const digits=x=>String(x||'').replace(/\D/g,'').replace(/^972/,'0');
+async function handleOlFile(file){
+  if(!file)return;
+  let rows;
+  try{if(/\.xlsx$/i.test(file.name)){if(typeof DecompressionStream==='undefined')throw new Error('nods');rows=await readXlsx(await file.arrayBuffer())}
+    else if(/\.(csv|txt)$/i.test(file.name))rows=readCsv(await file.text());
+    else{toast('אפשר להעלות רק xlsx או csv. בקובץ xls ישן: שמירה בשם ← Excel Workbook (xlsx)');return}}
+  catch(e){toast(e&&e.message==='nods'?'הדפדפן הזה לא תומך בקריאת אקסל – נסו בכרום, או שמרו כ-CSV':'לא הצלחנו לקרוא את הקובץ');return}
+  rows=rows.filter(r=>r.some(c=>String(c).trim()!==''));
+  const hi=rows.findIndex(r=>r.filter(c=>String(c).trim()!=='').length>=2);
+  if(hi<0||rows.length<hi+2){toast('לא מצאנו בקובץ שורת כותרות ושורות נתונים');return}
+  imRows={head:rows[hi].map(c=>String(c).trim()),data:rows.slice(hi+1),file:file.name};
+  const used=new Set();
+  $('imMap').innerHTML=OLF.map(([k,lbl,keys])=>{
+    let g=-1;for(const key of keys){g=imRows.head.findIndex((h,i)=>!used.has(i)&&h.includes(key)&&!(k==='phone'&&/הור|אם|אב/.test(h))&&!(k==='name'&&/משפחה|הור|אם|אב|מדריך/.test(h)));if(g>=0)break}
+    if(g>=0)used.add(g);
+    return `<tr><td><b>${lbl}</b></td><td><select data-map="${k}"><option value="-1">— אין —</option>${imRows.head.map((h,i)=>`<option value="${i}" ${i===g?'selected':''}>${esc(h||('עמודה '+(i+1)))}</option>`).join('')}</select></td></tr>`}).join('');
+  const sn=mySnifs();$('imSnif').innerHTML=sn.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('')+'<option value="__col">לפי עמודת "סניף" בקובץ</option>';
+  if(olSnif&&sn.includes(olSnif))$('imSnif').value=olSnif;
+  $('imInfo').textContent=`הקובץ ${file.name}: ${imRows.data.length} שורות.`;$('imErr').textContent='';
+  imPreview();$('imDlg').showModal();
+}
+function imMapped(){
+  const m={};document.querySelectorAll('#imMap [data-map]').forEach(s=>m[s.dataset.map]=+s.value);
+  const g=(r,k)=>m[k]>=0?r[m[k]]:'';const yrs=+$('imYears').value,cut=new Date();cut.setFullYear(cut.getFullYear()-yrs);
+  const snifSel=$('imSnif').value,out=[];let old=0,noName=0,noSnif=0;
+  for(const r of imRows.data){
+    const name=[g(r,'name'),g(r,'last')].map(x=>String(x).trim()).filter(Boolean).join(' ');
+    if(!name){noName++;continue}
+    const d=aliyahDate(g(r,'year'));if(yrs&&d&&d<cut){old++;continue}
+    let snif=snifSel==='__col'?norm(g(r,'snif')):snifSel;if(snifSel==='__col'&&!mySnifs().includes(snif)){noSnif++;continue}
+    const yv=g(r,'year');
+    out.push({name,shevet:norm(g(r,'shevet')),phone:norm(g(r,'phone')),parents:norm(g(r,'parents')),pphone:norm(g(r,'pphone')),address:norm(g(r,'address')),origin:norm(g(r,'origin')),
+      year:d?String(d.getFullYear()):norm(yv),snif});
+  }
+  return{out,old,noName,noSnif};
+}
+function imPreview(){
+  if(!imRows)return;const{out,old,noName,noSnif}=imMapped();
+  $('imPrev').innerHTML='<thead><tr><th>שם</th><th>שבט</th><th>מאיפה עלו</th><th>שנת עלייה</th><th>טלפון הורים</th><th>סניף</th></tr></thead><tbody>'+out.slice(0,5).map(o=>`<tr><td>${esc(o.name)}</td><td>${esc(o.shevet)}</td><td>${esc(o.origin)}</td><td>${esc(o.year)}</td><td>${esc(o.pphone)}</td><td>${esc(o.snif)}</td></tr>`).join('')+'</tbody>';
+  $('imCount').textContent=`ייובאו ${out.length} עולים`+(old?` · ${old} לא נכללו (עלו לפני יותר מ-${$('imYears').value} שנים)`:'')+(noName?` · ${noName} שורות בלי שם`:'')+(noSnif?` · ${noSnif} בלי סניף מתאים`:'');
+}
+$('imDlg').addEventListener('change',e=>{if(e.target.matches('select'))imPreview()});
+$('olFile').addEventListener('change',e=>{handleOlFile(e.target.files[0]);e.target.value=''});
+$('olDrop').addEventListener('dragover',e=>e.preventDefault());
+$('olDrop').addEventListener('drop',e=>{e.preventDefault();handleOlFile(e.dataTransfer.files[0])});
+$('imGo').addEventListener('click',async()=>{
+  const{out}=imMapped();if(!out.length){$('imErr').textContent='אין שורות לייבוא – בדקו את בחירת העמודות';return}
+  const b=$('imGo');b.disabled=true;let added=0,upd=0;
+  try{
+    const ex={};olim.forEach(o=>ex[norm(o.snif)+'|'+olNorm(o.name)]=o);
+    const ops=out.map(o=>{const e=ex[o.snif+'|'+olNorm(o.name)],body=Object.assign({},o,{importedBy:me.username,importedAt:new Date().toISOString(),file:imRows.file});
+      if(e){upd++;const keep={};for(const k in body)if(body[k]!=='')keep[k]=body[k];return()=>cOlim.doc(e._id).update(keep)}added++;return()=>cOlim.doc().set(body)});
+    for(let i=0;i<ops.length;i+=20)await Promise.all(ops.slice(i,i+20).map(f=>f()));
+    $('imDlg').close();toast(`יובאו ${added} עולים חדשים`+(upd?`, ${upd} עודכנו`:''));olSnif=$('imSnif').value==='__col'?'':$('imSnif').value;
+  }catch(e){$('imErr').textContent=mode==='firebase'?fbErr(e):'הייבוא נכשל'}
+  finally{b.disabled=false}
+});
+
+/* ---------- olim roster: view ---------- */
+function olMatch(o){const n=olNorm(o.name),p=digits(o.pphone)||digits(o.phone);
+  return kids.find(k=>norm(k.snif)===norm(o.snif)&&(olNorm(k.name)===n||(p&&p.length>=9&&(digits(k.pphone)===p||digits(k.phone)===p)&&olNorm(k.name).split(' ')[0]===n.split(' ')[0])))||null}
+function olState(o){const k=olMatch(o);if(!k)return{k:null,red:true,txt:'לא מגיע/ה – לא במערכת'};
+  const st=statusAt(k,week);return{k,red:st==='red',st,txt:st==='red'?`במערכת, לא מגיע/ה · ${madName(k)}`:`במערכת · ${madName(k)}`}}
+function olScope(){const sn=mySnifs();return olim.filter(o=>olSnif?norm(o.snif)===olSnif:sn.includes(norm(o.snif)))}
+function olFiltered(){const q=olNorm($('olQ').value),fh=$('olSh').value,fs=$('olSt').value;
+  return olScope().filter(o=>{const s=olState(o);return (!fh||(norm(o.shevet)||'ללא שבט')===fh)&&(!fs||(fs==='out'?s.red:!s.red))&&(!q||olNorm([o.name,o.origin,o.parents,o.shevet].join(' ')).includes(q))})}
+function renderOlim(){
+  if(!isMgr()||cur!=='olim')return;
+  const sn=mySnifs();if(olSnif&&!sn.includes(olSnif))olSnif='';
+  $('oTitle2').textContent='רשימת עולים · '+(olSnif||(sn.length===1?sn[0]:'כל הסניפים שלי'));
+  $('olSnifChips').innerHTML=sn.length>1?[['','כל הסניפים שלי'],...sn.map(x=>[x,x])].map(([v,t])=>`<button data-olsnif="${esc(v)}" aria-pressed="${v===olSnif}">${esc(t)}</button>`).join(''):'';
+  const base=olScope();
+  {const v=$('olSh').value,ex=[...new Set(base.map(o=>norm(o.shevet)||'ללא שבט'))];$('olSh').innerHTML='<option value="">כל השבטים</option>'+ex.sort(shvSort).map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');if(ex.includes(v))$('olSh').value=v}
+  if(!base.length){$('olSum').innerHTML='';$('olList').innerHTML='<div class="empty">עוד לא הועלתה רשימת עולים. לחצו למעלה כדי להעלות קובץ אקסל.</div>';return}
+  const byS={};base.forEach(o=>{const s=norm(o.shevet)||'ללא שבט';(byS[s]=byS[s]||[]).push(o)});
+  const tot=base.length,totRed=base.filter(o=>olState(o).red).length;
+  $('olSum').innerHTML=`<h3 style="font-size:22px;margin:0 0 8px">לפי שבט · ${tot} עולים, מתוכם <span style="color:var(--r)">${totRed} לא מגיעים</span></h3><div class="shv-row">${Object.keys(byS).sort(shvSort).map(s=>{const g=byS[s],r=g.filter(o=>olState(o).red).length;
+    return `<div class="shv ${r?'red':''}"><b>${s==='ללא שבט'?s:'שבט '+esc(s)}</b><div><b class="n">${g.length}</b> עולים</div><div class="dots"><span style="color:#1d6b2c">✓ ${g.length-r} מגיעים</span><span style="color:var(--r)">✗ ${r} לא מגיעים</span></div></div>`}).join('')}</div>`;
+  const list=olFiltered().sort((a,b)=>shvSort(norm(a.shevet)||'ללא שבט',norm(b.shevet)||'ללא שבט')||(olState(b).red-olState(a).red)||heSort(a.name,b.name));
+  if(!list.length){$('olList').innerHTML='<div class="empty">אין תוצאות לסינון הזה</div>';return}
+  $('olList').innerHTML=`<div class="scroll"><table class="stack"><thead><tr><th>שם</th><th>שבט</th>${!olSnif&&sn.length>1?'<th>סניף</th>':''}<th>מצב</th><th>מאיפה עלו</th><th>שנת עלייה</th><th>הורים</th><th>טלפון הורים</th><th></th></tr></thead><tbody>${list.map(o=>{const s=olState(o);
+    return `<tr class="${s.red?'redrow':''}"><td><b>${esc(o.name)}</b></td><td>${esc(o.shevet)}</td>${!olSnif&&sn.length>1?`<td>${esc(o.snif)}</td>`:''}<td><span class="pillst ${s.red?'no':'ok'}">${s.k&&s.st?`<span class="dot ${s.st}"></span>`:''}${esc(s.txt)}</span></td>
+      <td>${esc(o.origin)}</td><td>${esc(o.year)}</td><td>${esc(o.parents)}</td><td class="n"><span dir="ltr">${esc(o.pphone||o.phone)}</span></td>
+      <td>${s.k?`<button class="sm" data-hist="${esc(s.k._id)}">היסטוריה</button>`:`<button class="sm pri" data-assign="${esc(o._id)}">שיוך למדריך</button>`} <button class="sm del" data-oldel="${esc(o._id)}" aria-label="מחיקה מהרשימה">✕</button></td></tr>`}).join('')}</tbody></table></div>`;
+}
+['olQ','olSh','olSt'].forEach(id=>$(id).addEventListener('input',renderOlim));
+$('vOlim').addEventListener('click',async e=>{
+  const c=e.target.closest('[data-olsnif]');if(c){olSnif=c.dataset.olsnif;renderOlim();return}
+  const d=e.target.closest('[data-oldel]');if(d){if(d.dataset.sure!=='1'){d.dataset.sure='1';d.textContent='למחוק?';return}try{await cOlim.doc(d.dataset.oldel).delete()}catch(x){toast('המחיקה נכשלה')}return}
+  const a=e.target.closest('[data-assign]');if(a){const o=olim.find(x=>x._id===a.dataset.assign);if(!o)return;asId=o._id;
+    const staff=users.filter(u=>(u.role==='madrich'||u.role==='nachshon')&&snifsOf(u).includes(norm(o.snif)));
+    $('asT').textContent=`שיוך ${o.name} למדריך`;$('asErr').textContent=staff.length?'':'אין עדיין מדריכים רשומים בסניף הזה';
+    $('asMad').innerHTML=staff.map(u=>`<option value="${esc(u.username)}" data-role="${u.role}">${esc(u.name)} · ${ROLE[u.role]}</option>`).join('');
+    const syncPr=()=>{const op=$('asMad').selectedOptions[0];$('asPrWrap').classList.toggle('hid',!op||op.dataset.role!=='nachshon')};syncPr();$('asMad').onchange=syncPr;
+    $('asDlg').showModal()}
+});
+$('asFrm').addEventListener('submit',async e=>{
+  e.preventDefault();const o=olim.find(x=>x._id===asId),mu=$('asMad').value;if(!o||!mu)return;
+  const nach=(userBy(mu)||{}).role==='nachshon';
+  const body={name:o.name,shevet:o.shevet||'',phone:o.phone||'',parents:o.parents||'',pphone:o.pphone||'',address:o.address||'',origin:o.origin||'',year:o.year||'',
+    program:nach?$('asPr').value:'snif',madrich:mu,snif:norm(o.snif),log:{},created:new Date().toISOString(),fromOlim:o._id};
+  try{await cKids.doc().set(body);$('asDlg').close();toast(`${o.name} נוסף/ה למעקב של ${(userBy(mu)||{}).name||mu}`)}
+  catch(x){$('asErr').textContent=mode==='firebase'?fbErr(x):'השיוך נכשל'}
+});
+$('olCsv').addEventListener('click',()=>{
+  const H=['סניף','שבט','שם','מצב','מדריך','מאיפה עלו','שנת עלייה','שם ההורים','טלפון הורים','טלפון חניך','כתובת'];
+  const rows=olFiltered().map(o=>{const s=olState(o);return [o.snif,o.shevet,o.name,s.red?'לא מגיע/ה':'מגיע/ה',s.k?madName(s.k):'',o.origin,o.year,o.parents,o.pphone,o.phone,o.address].map(csvQ).join(',')});
+  if(!rows.length){toast('אין נתונים להורדה');return}
+  const text=[H.map(csvQ).join(','),...rows].join('\r\n');
+  if(typeof window.claude==='undefined'){const url=URL.createObjectURL(new Blob(['﻿'+text],{type:'text/csv;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download=`עמישב-עולים-${olSnif||'כל-הסניפים'}.csv`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);toast('הקובץ ירד')}
+  else navigator.clipboard.writeText(text).then(()=>toast('הועתק')).catch(()=>toast('ההעתקה נחסמה'));
+});
+
 /* ---------- chanich details dialog ---------- */
 function openForm(id){
   editId=id||null;const k=id?kids.find(x=>x._id===id):{};
@@ -1041,7 +1258,7 @@ function renderHero(){
 
 function renderAll(){
   route();if(!me){renderAuth();return}
-  $('editSnifs').classList.toggle('hid',me.role==='shmini');renderWeekBars();renderHero();renderMine();renderOver();renderTrack();renderUsers();
+  $('editSnifs').classList.toggle('hid',me.role==='shmini');renderWeekBars();renderHero();renderMine();renderOver();renderTrack();renderUsers();renderOlim();
 }
 
 const LOCAL_MSG='שימו לב: האתר עדיין לא מחובר למסד נתונים משותף, ולכן מה שמוזן כאן נשמר רק במכשיר ובדפדפן הזה. אחרי החיבור ל-Firebase כל הצוות יראה את אותם נתונים.';
@@ -1070,6 +1287,7 @@ function startSubs(){
     if(fresh(snap)){uOk=true;usersReady=true;ready()}else if(users.length)usersReady=true;
     restore();maybeBackfill();renderAll();
   },fail));
+  unsubs.push(cOlim.onSnapshot(snap=>{olim=snap.docs.map(d=>Object.assign({_id:d.id},d.data()));if(me)renderAll()},()=>{}));
   unsubs.push(cKids.onSnapshot(snap=>{
     kids=snap.docs.map(d=>Object.assign({_id:d.id},d.data()));
     if(fresh(snap)){kOk=true;ready()}
@@ -1093,7 +1311,7 @@ renderAuth();note('טוען…');
   }else if(standalone){db=localDb();mode='local';note(LOCAL_MSG)}
   else{mode='claude';try{db=await claude.use('db')}catch(e){db=null}}
   if(!db){note('אי אפשר להתחבר למאגר הנתונים בתצוגה הזו. פתחו את העמוד כשאתם מחוברים ל-Claude.');return}
-  cKids=db.collection('chanichim');cUsers=db.collection('users');cResets=db.collection('resets');cMeta=db.collection('meta');
+  cKids=db.collection('chanichim');cUsers=db.collection('users');cResets=db.collection('resets');cMeta=db.collection('meta');cOlim=db.collection('olim');
   cMeta.onSnapshot(snap=>{const d=snap.docs.find(x=>x.id==='snifim');snifNames=d?((d.data()||{}).names||[]):[];metaLoaded=true;renderAuth();maybeBackfill();if(me)renderAll()},()=>{metaLoaded=true;renderAuth()});
   if(mode==='firebase'){
     usersReady=true;note('');renderAll();

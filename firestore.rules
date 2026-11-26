@@ -29,10 +29,16 @@ service cloud.firestore {
       allow delete: if isOwner();
     }
 
+    // רשימת העולים שהרכזות מעלות מאקסל
+    match /olim/{id} {
+      allow read: if isMgr() || isOwner();
+      allow create, update, delete: if isMgr() || isOwner();
+    }
+
     // חניכים: מדריך יוצר ומעדכן את החניכים שלו, רכז/שמיניסט יכולים לעדכן את כולם
     match /chanichim/{id} {
       allow read: if signedIn();
-      allow create: if signedIn() && request.resource.data.madrich == myEmail();
+      allow create: if signedIn() && (request.resource.data.madrich == myEmail() || isMgr());
       allow update, delete: if signedIn() && (resource.data.madrich == myEmail() || isMgr() || isOwner());
     }
   }
