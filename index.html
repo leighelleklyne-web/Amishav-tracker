@@ -334,7 +334,7 @@ header.top{background:#fff;color:var(--ink);box-shadow:0 1px 0 var(--line),0 4px
 
   <!-- RAKAZ: users -->
   <section id="vUsers" class="hid">
-    <h2>הצוות בסניפים שלי</h2>
+    <div class="row"><h2>הצוות בסניפים שלי</h2><span class="sp"></span><button id="lvOpen" class="hid">👋 מדריכים שעוזבים</button><button id="prOpen" class="hid">🎓 החלפת שבטים שנתית</button></div>
     <div class="card" id="uSnifBox" style="margin:14px 0">
       <b>הסניפים שלי</b>
       <p class="small" style="margin:2px 0 8px">נוסף לך סניף? מוסיפים אותו כאן, והוא יופיע מיד ברשימה של המדריכים בהרשמה.</p>
@@ -416,6 +416,30 @@ header.top{background:#fff;color:var(--ink);box-shadow:0 1px 0 var(--line),0 4px
   <div class="row"><h2 id="hT"></h2><span class="sp"></span><button class="sm" data-close>סגירה</button></div>
   <div id="hInfo" class="small"></div>
   <div id="hLog" class="log"></div>
+</div></dialog>
+
+<!-- yearly shevet change -->
+<dialog id="prDlg"><div class="in">
+  <div class="row"><h2>🎓 נובמבר – זמן החלפת שבטים</h2><span class="sp"></span><button class="sm" data-close>סגירה</button></div>
+  <p style="margin:4px 0 6px">כל החניכים עולים שבט אחד, ונשארים אצל אותו מדריך – בלי להזין אותם מחדש:</p>
+  <p class="small" id="prOrder" style="margin:0 0 12px"></p>
+  <b>באילו סניפים?</b>
+  <div id="prSnifs" style="display:grid;gap:4px;margin:6px 0 12px"></div>
+  <label class="chk"><input type="checkbox" id="prMad" checked> גם המדריכים עולים שבט יחד עם החניכים שלהם</label>
+  <b>חניכי <span id="prLast"></span> (מסיימים):</b>
+  <label class="chk"><input type="radio" name="prGrad" value="keep" checked> להשאיר במערכת עם השבט "בוגרים"</label>
+  <label class="chk"><input type="radio" name="prGrad" value="del"> למחוק אותם מהמעקב (כולל ההיסטוריה)</label>
+  <div class="err" id="prErr"></div>
+  <div class="row" style="margin-top:12px"><button class="pri" id="prGo">ביצוע החלפת שבטים</button><button id="prLater">תזכירו לי מחר</button><button id="prSkip">כבר טיפלנו – לא להציג השנה</button></div>
+</div></dialog>
+
+<!-- August: madrichim leaving -->
+<dialog id="lvDlg"><div class="in">
+  <div class="row"><h2>👋 אוגוסט – סוף שנה: מי מהמדריכים עוזב?</h2><span class="sp"></span><button class="sm" data-close>סגירה</button></div>
+  <p style="margin:4px 0 10px">סמנו את המדריכים שמסיימים השנה. הם יימחקו מהאתר, והחניכים שלהם <b>לא</b> יימחקו – הם יעברו ל"ללא אחראי", ותוכלו לשייך אותם למדריכים החדשים (בפרטי החניך, או אוטומטית בהעלאת קובץ העולים לפי שבט).</p>
+  <div id="lvList" style="display:grid;gap:2px"></div>
+  <div class="err" id="lvErr"></div>
+  <div class="row" style="margin-top:12px"><button class="del" id="lvGo">הסרת המדריכים המסומנים</button><button id="lvLater">תזכירו לי מחר</button><button id="lvSkip">סיימנו לטפל – לא להציג השנה</button></div>
 </div></dialog>
 
 <!-- my account -->
@@ -501,6 +525,7 @@ let db=null,cKids=null,cUsers=null,kids=[],users=[],usersReady=false,me=null,sni
 const OWNERS=['tfutzot@bna.org.il','leighelleklyne@gmail.com'];
 const SHEVATIM=['רגבים','זרעים','נבטים','ניצנים','מעלות','הרא"ה','קדם'];
 const shvSort=(a,b)=>{const i=SHEVATIM.indexOf(a),j=SHEVATIM.indexOf(b);return (i<0?99:i)-(j<0?99:j)||heSort(a,b)};
+let promos={},kidsLoaded=false,promoAuto=false;
 let snifNames=[],metaLoaded=false,backfilled=false,cMeta=null,cOlim=null,olim=[],olSnif='',imRows=null,asId=null,imResult='';
 const drafts={};let cResets=null,resets=[],mode='local',fb=null,fbUser=null,registering=false,unsubs=[],uOk=false;
 const FBV='10.14.1',loadScript=src=>new Promise((ok,no)=>{const t=document.createElement('script');t.src=src;t.onload=ok;t.onerror=no;document.head.appendChild(t)});
@@ -709,7 +734,7 @@ function openPw(u,forced){
   $('pDlg').showModal();$('pNew').focus();
 }
 $('pDlg').addEventListener('cancel',e=>{if($('pCancel').classList.contains('hid'))e.preventDefault()});
-$('logout').addEventListener('click',()=>{backfilled=false;if($('pDlg').open)$('pDlg').close();if(fb)fb.signOut();me=null;store.del('am_sess');location.hash='';snifSel='';regSnifs.length=0;chipEd($('lSnifChips'),regSnifs);['lName','lSnif','lUser','lPass'].forEach(id=>$(id).value='');authMode='login';$('lErr').textContent='';renderAll()});
+$('logout').addEventListener('click',()=>{backfilled=false;promoAuto=false;leaveAuto=false;if($('pDlg').open)$('pDlg').close();if(fb)fb.signOut();me=null;store.del('am_sess');location.hash='';snifSel='';regSnifs.length=0;chipEd($('lSnifChips'),regSnifs);['lName','lSnif','lUser','lPass'].forEach(id=>$(id).value='');authMode='login';$('lErr').textContent='';renderAll()});
 function restore(){
   if(mode==='firebase'){
     me=fbUser?(userBy(String(fbUser.email||'').toLowerCase())||null):null;
@@ -897,7 +922,7 @@ $('csvAllHist').addEventListener('click',()=>exportCSV(myAll().flatMap(k=>Object
 /* ---------- rakaz: staff ---------- */
 function renderUsers(){
   if(!isMgr())return;
-  const canEd=me.role==='rakaz'||me.role==='admin';
+  const canEd=me.role==='rakaz'||me.role==='admin';$('prOpen').classList.toggle('hid',!canEd);$('lvOpen').classList.toggle('hid',!canEd);
   $('resetBox').classList.toggle('hid',!OWNERS.includes(me.username));
   $('allSnifBox').classList.toggle('hid',!OWNERS.includes(me.username));
   if(OWNERS.includes(me.username)){const all=[...new Set([...snifNames,...users.filter(u=>u.role==='rakaz'||u.role==='admin').flatMap(u=>snifsOf(u,true))])].sort(heSort);
@@ -924,7 +949,7 @@ $('vUsers').addEventListener('click',async e=>{
   const rd=e.target.closest('[data-rdel]');if(rd){try{await cResets.doc(rd.dataset.rdel).delete()}catch(x){toast('הפעולה נכשלה')}return}
   const d=e.target.closest('[data-udel]');
   if(d){if(d.dataset.sure!=='1'){d.dataset.sure='1';d.textContent='בטוח?';return}
-    try{await cUsers.doc(d.dataset.udel).delete();toast('המשתמש נמחק. החניכים שלו נשארו במערכת.')}catch(err){toast('המחיקה נכשלה')}}
+    try{const n=await removeStaff([d.dataset.udel]);toast(n?`המשתמש נמחק. ${n} החניכים שלו עברו ל"ללא אחראי" ואפשר לשייך אותם למדריך אחר.`:'המשתמש נמחק.')}catch(err){toast(mode==='firebase'?fbErr(err):'המחיקה נכשלה')}}
 });
 $('pFrm').addEventListener('submit',async e=>{
   e.preventDefault();const p=$('pNew').value;if(!pwOk(p)){$('pErr').textContent='הסיסמה לא עומדת בכל הדרישות שברשימה';return}
@@ -1163,6 +1188,91 @@ $('olCsv').addEventListener('click',()=>{
   else navigator.clipboard.writeText(text).then(()=>toast('הועתק')).catch(()=>toast('ההעתקה נחסמה'));
 });
 
+/* ---------- staff removal & yearly shevet change ---------- */
+async function removeStaff(emails){
+  let n=0;const ops=[];
+  for(const em of emails){kids.filter(k=>k.madrich===em).forEach(k=>{n++;ops.push(()=>cKids.doc(k._id).update({madrich:''}))});}
+  for(let i=0;i<ops.length;i+=20)await Promise.all(ops.slice(i,i+20).map(f=>f()));
+  for(const em of emails)await cUsers.doc(em).delete();
+  return n;
+}
+const YEAR=String(new Date().getFullYear()),LAST_SH=SHEVATIM[SHEVATIM.length-1];
+const isRakazMe=()=>me&&(me.role==='rakaz'||me.role==='admin');
+const promoDone=sn=>(promos[YEAR]||{})[sn];
+const nextSh=sh=>{const i=SHEVATIM.indexOf(norm(sh));return i<0?null:(i===SHEVATIM.length-1?'GRAD':SHEVATIM[i+1])};
+function openPromo(){
+  if(!isRakazMe())return;
+  const sn=snifsOf(me,true);
+  $('prOrder').innerHTML=SHEVATIM.map(esc).join(' ← ')+' ← <b>בוגרים</b>';$('prLast').textContent=LAST_SH;
+  $('prSnifs').innerHTML=sn.map(x=>{const d=promoDone(x),n=kids.filter(k=>norm(k.snif)===x&&nextSh(k.shevet)).length;
+    return `<label class="chk" style="margin:0"><input type="checkbox" data-prs="${esc(x)}" ${d?'disabled':(n?'checked':'')}> <b>${esc(x)}</b> <span class="small">${d?`– כבר בוצע השנה${d.skipped?' (סומן כ"כבר טיפלנו")':''}`:`– ${n} חניכים יעלו שבט`}</span></label>`}).join('')||'<span class="small">אין לך סניפים</span>';
+  $('prErr').textContent='';$('prDlg').showModal();
+}
+function maybePromo(){
+  if(promoAuto||!isRakazMe()||!kidsLoaded||!metaLoaded||new Date().getMonth()!==10)return;
+  if(!snifsOf(me,true).some(x=>!promoDone(x)&&kids.some(k=>norm(k.snif)===x&&nextSh(k.shevet))))return;
+  if(store.get('am_promo_snooze')===new Date().toDateString())return;
+  promoAuto=true;setTimeout(()=>{if(me&&!document.querySelector('dialog[open]'))openPromo()},400);
+}
+async function markPromos(list,extra,key){
+  key=key||YEAR;const y=Object.assign({},promos[key]||{});list.forEach(x=>y[x]=Object.assign({by:me.username,at:new Date().toISOString()},extra||{}));
+  await cMeta.doc('promotions').set(Object.assign({},promos,{[key]:y}));
+}
+/* August: madrichim leaving */
+const AUG='aug-'+YEAR,leaveDone=sn=>(promos[AUG]||{})[sn];
+const leavers=()=>{const sn=snifsOf(me,true);return users.filter(u=>(u.role==='madrich'||u.role==='nachshon')&&snifsOf(u).some(x=>sn.includes(x))).sort((a,b)=>heSort(snifsOf(a,true).join()+a.name,snifsOf(b,true).join()+b.name))};
+function openLeave(){
+  if(!isRakazMe())return;const st=leavers();
+  $('lvList').innerHTML=st.length?st.map(u=>`<label class="chk" style="margin:0"><input type="checkbox" data-lv="${esc(u.username)}"> <b>${esc(u.name)}</b> <span class="small">· ${esc(ROLE[u.role])}${u.shevet?' · שבט '+esc(u.shevet):''} · ${esc(snifsOf(u,true).join(', '))} · ${kids.filter(k=>k.madrich===u.username).length} חניכים</span></label>`).join(''):'<span class="small">אין מדריכים רשומים בסניפים שלך</span>';
+  $('lvErr').textContent='';$('lvGo').dataset.sure='';$('lvGo').textContent='הסרת המדריכים המסומנים';$('lvDlg').showModal();
+}
+let leaveAuto=false;
+function maybeLeave(){
+  if(leaveAuto||!isRakazMe()||!kidsLoaded||!metaLoaded||new Date().getMonth()!==7)return;
+  if(!leavers().length||!snifsOf(me,true).some(x=>!leaveDone(x)))return;
+  if(store.get('am_leave_snooze')===new Date().toDateString())return;
+  leaveAuto=true;setTimeout(()=>{if(me&&!document.querySelector('dialog[open]'))openLeave()},400);
+}
+$('lvOpen').addEventListener('click',openLeave);
+$('lvLater').addEventListener('click',()=>{store.set('am_leave_snooze',new Date().toDateString());$('lvDlg').close()});
+$('lvSkip').addEventListener('click',async()=>{try{await markPromos(snifsOf(me,true),{done:true},AUG);$('lvDlg').close();toast('סומן – לא נציג השנה')}catch(x){$('lvErr').textContent=mode==='firebase'?fbErr(x):'השמירה נכשלה'}});
+$('lvGo').addEventListener('click',async()=>{
+  const sel=[...document.querySelectorAll('[data-lv]:checked')].map(x=>x.dataset.lv);if(!sel.length){$('lvErr').textContent='סמנו לפחות מדריך אחד';return}
+  const b=$('lvGo');if(b.dataset.sure!=='1'){b.dataset.sure='1';b.textContent=`בטוח? להסיר ${sel.length} מדריכים`;return}
+  b.disabled=true;
+  try{const n=await removeStaff(sel);await markPromos(snifsOf(me,true),{removed:sel.length},AUG);$('lvDlg').close();
+    toast(`הוסרו ${sel.length} מדריכים. ${n} חניכים ממתינים לשיוך תחת "ללא אחראי".`)}
+  catch(x){$('lvErr').textContent=mode==='firebase'?fbErr(x):'ההסרה נכשלה'}
+  finally{b.disabled=false}
+});
+$('prOpen').addEventListener('click',openPromo);
+$('prLater').addEventListener('click',()=>{store.set('am_promo_snooze',new Date().toDateString());$('prDlg').close()});
+$('prSkip').addEventListener('click',async()=>{
+  const sel=[...document.querySelectorAll('[data-prs]:checked')].map(x=>x.dataset.prs);if(!sel.length){$('prDlg').close();return}
+  try{await markPromos(sel,{skipped:true});$('prDlg').close();toast('סומן – לא נציג השנה')}catch(x){$('prErr').textContent=mode==='firebase'?fbErr(x):'השמירה נכשלה'}
+});
+$('prGo').addEventListener('click',async()=>{
+  const sel=[...document.querySelectorAll('[data-prs]:checked')].map(x=>x.dataset.prs);
+  if(!sel.length){$('prErr').textContent='בחרו לפחות סניף אחד';return}
+  const b=$('prGo');if(b.dataset.sure!=='1'){b.dataset.sure='1';b.textContent='בטוח? לחצו שוב לביצוע';return}
+  b.disabled=true;$('prErr').textContent='';
+  const del=document.querySelector('[name=prGrad]:checked').value==='del',movMad=$('prMad').checked;
+  let up=0,grad=0;const ops=[];
+  try{
+    kids.filter(k=>sel.includes(norm(k.snif))).forEach(k=>{const nx=nextSh(k.shevet);if(!nx)return;
+      if(nx==='GRAD'){grad++;ops.push(()=>del?cKids.doc(k._id).delete():cKids.doc(k._id).update({shevet:'בוגרים'}))}else{up++;ops.push(()=>cKids.doc(k._id).update({shevet:nx}))}});
+    olim.filter(o=>sel.includes(norm(o.snif))).forEach(o=>{const nx=nextSh(o.shevet);if(!nx)return;
+      ops.push(()=>nx==='GRAD'?(del?cOlim.doc(o._id).delete():cOlim.doc(o._id).update({shevet:'בוגרים'})):cOlim.doc(o._id).update({shevet:nx}))});
+    if(movMad)users.filter(u=>u.role==='madrich'&&snifsOf(u).some(x=>sel.includes(x))).forEach(u=>{const nx=nextSh(u.shevet);if(!nx)return;
+      ops.push(()=>cUsers.doc(u.username).update({shevet:nx==='GRAD'?'':nx}))});
+    for(let i=0;i<ops.length;i+=20)await Promise.all(ops.slice(i,i+20).map(f=>f()));
+    await markPromos(sel,{up,grad});
+    $('prDlg').close();
+    toast(`בוצע! ${up} חניכים עלו שבט`+(grad?`, ${grad} חניכי ${LAST_SH} ${del?'נמחקו':'עברו ל"בוגרים"'}`:'')+'.');
+  }catch(x){$('prErr').textContent='משהו נכשל באמצע: '+(mode==='firebase'?fbErr(x):'נסו שוב')}
+  finally{b.disabled=false;b.dataset.sure='';b.textContent='ביצוע החלפת שבטים'}
+});
+
 /* ---------- chanich details dialog ---------- */
 function openForm(id){
   editId=id||null;const k=id?kids.find(x=>x._id===id):{};
@@ -1244,7 +1354,7 @@ $('acDel').addEventListener('click',async()=>{
       registering=true;
     }
     step='מחיקת החניכים';
-    if($('acKids').checked)for(const k of kids.filter(k=>k.madrich===me.username))await cKids.doc(k._id).delete();
+    for(const k of kids.filter(k=>k.madrich===me.username))await ($('acKids').checked?cKids.doc(k._id).delete():cKids.doc(k._id).update({madrich:''}));
     step='עדכון רשימת הסניפים';
     if(me.role==='rakaz'||me.role==='admin')await publishSnifim(users.filter(u=>(u.role==='rakaz'||u.role==='admin')&&u.username!==me.username).flatMap(u=>snifsOf(u,true)));
     step='מחיקת הפרופיל';
@@ -1281,7 +1391,7 @@ function renderHero(){
 
 function renderAll(){
   route();if(!me){renderAuth();return}
-  $('editSnifs').classList.toggle('hid',me.role==='shmini');renderWeekBars();renderHero();renderMine();renderOver();renderTrack();renderUsers();renderOlim();
+  $('editSnifs').classList.toggle('hid',me.role==='shmini');renderWeekBars();renderHero();renderMine();renderOver();renderTrack();renderUsers();renderOlim();maybePromo();maybeLeave();
 }
 
 const LOCAL_MSG='שימו לב: האתר עדיין לא מחובר למסד נתונים משותף, ולכן מה שמוזן כאן נשמר רק במכשיר ובדפדפן הזה. אחרי החיבור ל-Firebase כל הצוות יראה את אותם נתונים.';
@@ -1313,7 +1423,7 @@ function startSubs(){
   unsubs.push(cOlim.onSnapshot(snap=>{olim=snap.docs.map(d=>Object.assign({_id:d.id},d.data()));if(me)renderAll()},()=>{}));
   unsubs.push(cKids.onSnapshot(snap=>{
     kids=snap.docs.map(d=>Object.assign({_id:d.id},d.data()));
-    if(fresh(snap)){kOk=true;ready()}
+    if(fresh(snap)){kOk=true;kidsLoaded=true;ready()}
     renderAll();
   },fail));
 }
@@ -1335,7 +1445,7 @@ renderAuth();note('טוען…');
   else{mode='claude';try{db=await claude.use('db')}catch(e){db=null}}
   if(!db){note('אי אפשר להתחבר למאגר הנתונים בתצוגה הזו. פתחו את העמוד כשאתם מחוברים ל-Claude.');return}
   cKids=db.collection('chanichim');cUsers=db.collection('users');cResets=db.collection('resets');cMeta=db.collection('meta');cOlim=db.collection('olim');
-  cMeta.onSnapshot(snap=>{const d=snap.docs.find(x=>x.id==='snifim');snifNames=d?((d.data()||{}).names||[]):[];metaLoaded=true;renderAuth();maybeBackfill();if(me)renderAll()},()=>{metaLoaded=true;renderAuth()});
+  cMeta.onSnapshot(snap=>{const d=snap.docs.find(x=>x.id==='snifim');snifNames=d?((d.data()||{}).names||[]):[];const pd=snap.docs.find(x=>x.id==='promotions');promos=pd?(pd.data()||{}):{};metaLoaded=true;renderAuth();maybeBackfill();if(me)renderAll()},()=>{metaLoaded=true;renderAuth()});
   if(mode==='firebase'){
     usersReady=true;note('');renderAll();
     fb.onAuthStateChanged(u=>{fbUser=u;
