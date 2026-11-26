@@ -583,9 +583,11 @@ const gradeLbl=sh=>{if(GRADE_OF[sh])return GRADE_OF[sh];const j=NAMED.indexOf(sh
 const shOpt=x=>{const g=gradeLbl(x);return `${esc(x)}${g?` (כיתה ${g}${g.length>1?'':'׳'})`:''}`};
 const qn=x=>String(x||'').replace(/["'״׳`]/g,'').replace(/\s+/g,' ').trim();
 function gradeToSh(v){
-  let t=String(v??'').replace(/כיתה|כתה|שכבה|כ׳|כ'/g,'').replace(/["'״׳`.\-\s]/g,'').trim();if(!t)return'';
-  let i=-1;if(/^\d+$/.test(t))i=+t-2;else{const H={'ב':0,'ג':1,'ד':2,'ה':3,'ו':4,'ז':5,'ח':6,'ט':7,'י':8,'יא':9,'יב':10};i=H[t]??-1}
-  if(i<0)return'';return i<7?GRADE_SH[i]:(NAMED[i-7]||'');
+  const t=String(v??'').replace(/כיתה|כתה|שכבה/g,' ').trim();if(!t)return'';
+  let i=-1,m=t.match(/^(יא|יב|י|[א-ט])(?=$|['"׳״`\s\-–.,/\d])/);
+  if(m){const H={'א':-1,'ב':0,'ג':1,'ד':2,'ה':3,'ו':4,'ז':5,'ח':6,'ט':7,'י':8,'יא':9,'יב':10};i=H[m[1]]}
+  else if((m=t.match(/^(\d{1,2})(?!\d)/)))i=+m[1]-2;
+  if(i==null||i<0)return'';return i<7?GRADE_SH[i]:(NAMED[i-7]||'');
 }
 function toShevet(v){const q=qn(v);if(!q)return'';const hit=shOrder().find(x=>qn(x)===q);return hit||gradeToSh(v)}
 const shvSort=(a,b)=>{const O=shOrder(),i=O.indexOf(a),j=O.indexOf(b);return (i<0?99:i)-(j<0?99:j)||heSort(a,b)};
@@ -798,7 +800,7 @@ function openPw(u,forced){
   $('pDlg').showModal();$('pNew').focus();
 }
 $('pDlg').addEventListener('cancel',e=>{if($('pCancel').classList.contains('hid'))e.preventDefault()});
-$('logout').addEventListener('click',()=>{backfilled=false;promoAuto=false;leaveAuto=false;if($('pDlg').open)$('pDlg').close();if(fb)fb.signOut();me=null;store.del('am_sess');location.hash='';snifSel='';regSnifs.length=0;chipEd($('lSnifChips'),regSnifs);['lName','lSnif','lUser','lPass'].forEach(id=>$(id).value='');authMode='login';$('lErr').textContent='';renderAll()});
+$('logout').addEventListener('click',()=>{backfilled=false;promoAuto=false;leaveAuto=false;fixKey='';if($('pDlg').open)$('pDlg').close();if(fb)fb.signOut();me=null;store.del('am_sess');location.hash='';snifSel='';regSnifs.length=0;chipEd($('lSnifChips'),regSnifs);['lName','lSnif','lUser','lPass'].forEach(id=>$(id).value='');authMode='login';$('lErr').textContent='';renderAll()});
 function restore(){
   if(mode==='firebase'){
     me=fbUser?(userBy(String(fbUser.email||'').toLowerCase())||null):null;
@@ -1205,7 +1207,7 @@ $('imGo').addEventListener('click',async()=>{
     let kNew=0,kAs=0,kFix=0,kRed=0;const seen=new Set();
     out.forEach(o=>{const key=o.snif+'|'+olNorm(o.name);if(seen.has(key))return;seen.add(key);
       const k=olMatch(o);
-      if(k){const upd={};if(!k.shevet&&o.shevet)upd.shevet=o.shevet;if(!k.madrich){const m=pick(o.snif,o.shevet||k.shevet);if(m){kFix++;upd.madrich=m}}
+      if(k){const upd={};if(o.shevet&&(!k.shevet||!shOrder().includes(k.shevet))&&k.shevet!==o.shevet)upd.shevet=o.shevet;if(!k.madrich){const m=pick(o.snif,o.shevet||k.shevet);if(m){kFix++;upd.madrich=m}}
         if(!statusAt(k,THIS)){kRed++;upd.initStatus='red'}
         if(Object.keys(upd).length)ops.push(()=>cKids.doc(k._id).update(upd));return}
       const m=pick(o.snif,o.shevet);kNew++;if(m)kAs++;
@@ -1496,7 +1498,7 @@ function renderHero(){
 
 function renderAll(){
   route();if(!me){renderAuth();return}
-  $('editSnifs').classList.toggle('hid',me.role==='shmini');renderWeekBars();renderHero();renderMine();renderOver();renderTrack();renderUsers();renderOlim();maybePromo();maybeLeave();
+  $('editSnifs').classList.toggle('hid',me.role==='shmini');renderWeekBars();renderHero();renderMine();renderOver();renderTrack();renderUsers();renderOlim();maybePromo();maybeLeave();autoFix();
 }
 
 const LOCAL_MSG='שימו לב: האתר עדיין לא מחובר למסד נתונים משותף, ולכן מה שמוזן כאן נשמר רק במכשיר ובדפדפן הזה. אחרי החיבור ל-Firebase כל הצוות יראה את אותם נתונים.';
@@ -1537,6 +1539,28 @@ function maybeBackfill(){
   backfilled=true;
   if(!(me.role==='rakaz'||me.role==='admin')||OWNERS.includes(me.username))return;
   const mine=snifsOf(me,true);if(mine.some(s=>!snifNames.includes(s)))publishSnifim([...snifNames,...mine]);
+}
+// תיקון אוטומטי: שבט שנכתב ככיתה (למשל "ז' - 3") מתורגם לשבט, וחניך בלי מדריך משויך למדריך של השבט בסניף.
+// רץ פעם אחת לכל מצב נתונים – אם משהו נכשל, לא מנסה שוב בלולאה.
+let fixKey='';
+async function autoFix(){
+  if(!isMgr()||!kidsLoaded||!uOk)return;
+  const sn=mySnifs(),O=shOrder();
+  const key=sn.join()+'|'+NAMED.join()+'|'+users.map(u=>u.username+':'+(u.shevet||'')).join()+'|'+kids.filter(k=>!k.madrich||!O.includes(norm(k.shevet))).map(k=>k._id+(k.shevet||'')).join()+'|'+olim.filter(o=>!O.includes(norm(o.shevet))).length;
+  if(key===fixKey)return;fixKey=key;
+  const load={};kids.forEach(k=>{if(k.madrich)load[k.madrich]=(load[k.madrich]||0)+1});
+  const ops=[];let fixed=0,assigned=0;
+  kids.filter(k=>sn.includes(norm(k.snif))).forEach(k=>{
+    const upd={};let sh=norm(k.shevet);
+    if(sh&&!O.includes(sh)){const g=toShevet(sh);if(g&&O.includes(g)){upd.shevet=g;sh=g;fixed++}}
+    if(!k.madrich&&sh&&!isNach(k)){const c=users.filter(u=>u.role==='madrich'&&snifsOf(u).includes(norm(k.snif))&&norm(u.shevet)===sh).sort((a,b)=>(load[a.username]||0)-(load[b.username]||0));
+      if(c.length){upd.madrich=c[0].username;load[c[0].username]=(load[c[0].username]||0)+1;assigned++}}
+    if(Object.keys(upd).length)ops.push(()=>cKids.doc(k._id).update(upd));
+  });
+  olim.filter(o=>sn.includes(norm(o.snif))).forEach(o=>{const sh=norm(o.shevet);if(sh&&!O.includes(sh)){const g=toShevet(sh);if(g&&O.includes(g))ops.push(()=>cOlim.doc(o._id).update({shevet:g}))}});
+  if(!ops.length)return;
+  try{for(let i=0;i<ops.length;i+=20)await Promise.all(ops.slice(i,i+20).map(f=>f()));
+    if(fixed||assigned)toast((fixed?`${fixed} כיתות תורגמו לשבטים`:'')+(fixed&&assigned?' · ':'')+(assigned?`${assigned} חניכים שויכו למדריך השבט`:''))}catch(e){}
 }
 function stopSubs(){unsubs.forEach(f=>{try{f()}catch(e){}});unsubs=[]}
 renderAuth();note('טוען…');
