@@ -375,6 +375,12 @@ body{background-image:radial-gradient(circle at 1px 1px,rgba(85,176,255,.13) 1px
       <div class="chipEd" id="uSnifChips"></div>
     </div>
     <div id="reqBox"></div>
+    <div class="card hid" id="namedBox" style="margin:14px 0">
+      <b>שמות השבטים הבוגרים (ט׳–י״ב)</b>
+      <p class="small" style="margin:2px 0 8px">מכיתה ט׳ לכל שבט יש שם משלו. כאן רואים ומתקנים את השמות, מהצעיר (ט׳) לבוגר (י״ב). בנובמבר, בהחלפת השבטים, נוסף אוטומטית השם של שבט ט׳ החדש.</p>
+      <div class="chipEd" id="namedChips"></div>
+      <div class="addRow" style="margin-top:8px"><input id="namedAdd" placeholder="שם שבט"><button type="button" id="namedBtn">הוספה בסוף הרשימה</button></div>
+    </div>
     <div class="card hid" id="allSnifBox" style="margin:14px 0">
       <b>כל הסניפים במערכת</b>
       <p class="small" style="margin:2px 0 8px">זו הרשימה שהמדריכים בוחרים ממנה בהרשמה. לחיצה על × מוחקת את הסניף מהרשימה ומכל הרכזות שמחזיקות בו. החניכים והמדריכים שכבר בסניף לא נמחקים.</p>
@@ -410,7 +416,7 @@ body{background-image:radial-gradient(circle at 1px 1px,rgba(85,176,255,.13) 1px
   <b style="display:block;margin-top:12px">תצוגה מקדימה</b>
   <div class="scroll"><table id="imPrev"></table></div>
   <div class="err" id="imErr"></div>
-  <p class="small" style="margin:10px 0 0">עולים שעוד לא במערכת יתווספו כחניכים <b style="color:var(--r)">במצב אדום</b>, וישויכו אוטומטית למדריך של אותו שבט בסניף. אם אין מדריך לשבט – הם יחכו לשיוך תחת "ללא אחראי" במעקב מדריכים.</p>
+  <p class="small" style="margin:10px 0 0">אם בקובץ יש כיתה במקום שבט, האתר מתרגם לבד: ד׳ נבטים · ה׳ ניצנים · ו׳ מעלות · ז׳ מעפילים · ח׳ הרא"ה · ט׳ ומעלה לפי שמות השבטים הבוגרים.<br>עולים שעוד לא במערכת יתווספו כחניכים <b style="color:var(--r)">במצב אדום</b>, וישויכו אוטומטית למדריך של אותו שבט בסניף. אם אין מדריך לשבט – הם יחכו לשיוך תחת "ללא אחראי" במעקב מדריכים.</p>
   <div class="row" style="margin-top:12px"><button class="pri" id="imGo">ייבוא</button><span class="small" id="imCount"></span></div>
 </div></dialog>
 <dialog id="asDlg"><form id="asFrm">
@@ -428,7 +434,7 @@ body{background-image:radial-gradient(circle at 1px 1px,rgba(85,176,255,.13) 1px
   <div class="grid">
     <div><label for="f_name">שם החניך/ה *</label><input id="f_name" required></div>
     <div id="prWrap" class="hid"><label for="f_program">מסגרת</label><select id="f_program"><option value="moadonit">מועדונית</option><option value="ach">אח גדול</option></select></div>
-    <div><label for="f_shevet">שבט</label><select id="f_shevet"></select></div>
+    <div><label for="f_shevet">שבט</label><select id="f_shevet"></select><span class="small hid" id="shLockTxt">חניכים מתווספים לשבט שלך</span></div>
     <div><label for="f_phone">טלפון חניך</label><input id="f_phone" type="tel" dir="ltr"></div>
     <div><label for="f_parents">שם ההורים</label><input id="f_parents"></div>
     <div><label for="f_pphone">טלפון הורים</label><input id="f_pphone" type="tel" dir="ltr"></div>
@@ -459,9 +465,11 @@ body{background-image:radial-gradient(circle at 1px 1px,rgba(85,176,255,.13) 1px
   <b>באילו סניפים?</b>
   <div id="prSnifs" style="display:grid;gap:4px;margin:6px 0 12px"></div>
   <label class="chk"><input type="checkbox" id="prMad" checked> גם המדריכים עולים שבט יחד עם החניכים שלהם</label>
-  <b>חניכי שבט <span id="prLast"></span> (מסיימים):</b>
+  <div id="prNewWrap" style="margin:6px 0 12px"><label for="prNew">חניכי הרא"ה עולים לכיתה ט׳ ומקבלים שם שבט חדש. מה השם?</label><input id="prNew" placeholder="שם השבט החדש"></div>
+  <p id="prNewFixed" class="hint hid"></p>
+  <div id="prGradWrap"><b>חניכי שבט <span id="prLast"></span> (סיימו י״ב):</b>
   <label class="chk"><input type="radio" name="prGrad" value="keep" checked> להעביר לחב"ב – ממשיכים במעקב</label>
-  <label class="chk"><input type="radio" name="prGrad" value="del"> להסיר אותם מהמעקב (לא יופיעו יותר באתר)</label>
+  <label class="chk"><input type="radio" name="prGrad" value="del"> להסיר אותם מהמעקב (לא יופיעו יותר באתר)</label></div>
   <div class="err" id="prErr"></div>
   <div class="row" style="margin-top:12px"><button class="pri" id="prGo">ביצוע החלפת שבטים</button><button id="prLater">תזכירו לי מחר</button><button id="prSkip">כבר טיפלנו – לא להציג השנה</button></div>
 </div></dialog>
@@ -564,9 +572,23 @@ let week=THIS;
 /* ---------- state ---------- */
 let db=null,cKids=null,cUsers=null,kids=[],users=[],usersReady=false,me=null,snifSel='',editId=null,pUser=null,authMode='login',regRole='madrich',regSnifs=[],edSnifs=[];
 const OWNERS=['tfutzot@bna.org.il','leighelleklyne@gmail.com'];
-const SHEVATIM=['רגבים','זרעים','נבטים','ניצנים','מעלות','הרא"ה','קדם'];
-const GRAD='חב"ב',SH_ORDER=[...SHEVATIM,GRAD];
-const shvSort=(a,b)=>{const i=SH_ORDER.indexOf(a),j=SH_ORDER.indexOf(b);return (i<0?99:i)-(j<0?99:j)||heSort(a,b)};
+// שבטי שכבה קבועים (ב'–ח'), ואחריהם שבטים עם שם משלהם (ט'–י"ב) שנקבע כל שנה
+const GRADE_SH=['רגבים','זרעים','נבטים','ניצנים','מעלות','מעפילים','הרא"ה'];
+const GRADE_OF={'רגבים':'ב','זרעים':'ג','נבטים':'ד','ניצנים':'ה','מעלות':'ו','מעפילים':'ז','הרא"ה':'ח'};
+const NAMED_GRADES=['ט','י','יא','יב'];
+let shvDoc=null,NAMED=['קדם'];
+const allSh=()=>[...GRADE_SH,...NAMED];
+const GRAD='חב"ב',shOrder=()=>[...allSh(),GRAD];
+const gradeLbl=sh=>{if(GRADE_OF[sh])return GRADE_OF[sh];const j=NAMED.indexOf(sh);return j>=0?NAMED_GRADES[j]:''};
+const shOpt=x=>{const g=gradeLbl(x);return `${esc(x)}${g?` (כיתה ${g}${g.length>1?'':'׳'})`:''}`};
+const qn=x=>String(x||'').replace(/["'״׳`]/g,'').replace(/\s+/g,' ').trim();
+function gradeToSh(v){
+  let t=String(v??'').replace(/כיתה|כתה|שכבה|כ׳|כ'/g,'').replace(/["'״׳`.\-\s]/g,'').trim();if(!t)return'';
+  let i=-1;if(/^\d+$/.test(t))i=+t-2;else{const H={'ב':0,'ג':1,'ד':2,'ה':3,'ו':4,'ז':5,'ח':6,'ט':7,'י':8,'יא':9,'יב':10};i=H[t]??-1}
+  if(i<0)return'';return i<7?GRADE_SH[i]:(NAMED[i-7]||'');
+}
+function toShevet(v){const q=qn(v);if(!q)return'';const hit=shOrder().find(x=>qn(x)===q);return hit||gradeToSh(v)}
+const shvSort=(a,b)=>{const O=shOrder(),i=O.indexOf(a),j=O.indexOf(b);return (i<0?99:i)-(j<0?99:j)||heSort(a,b)};
 let promos={},kidsLoaded=false,promoAuto=false;
 let snifNames=[],metaLoaded=false,backfilled=false,cMeta=null,cOlim=null,olim=[],olSnif='',imRows=null,asId=null,imResult='';
 const drafts={};let cResets=null,resets=[],mode='local',fb=null,fbUser=null,registering=false,unsubs=[],uOk=false;
@@ -640,7 +662,7 @@ function renderAuth(){
   $('tLogin').setAttribute('aria-pressed',!reg);$('tReg').setAttribute('aria-pressed',reg);
   document.querySelectorAll('.regOnly').forEach(e=>e.classList.toggle('hid',!reg));
   if(reg){$('oneSnif').classList.toggle('hid',regRole==='rakaz');$('manySnif').classList.toggle('hid',regRole!=='rakaz');$('shvWrap').classList.toggle('hid',regRole!=='madrich')}
-  if(!$('lShevet').options.length)$('lShevet').innerHTML='<option value="">בחרו שבט…</option>'+SHEVATIM.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');
+  {const v=$('lShevet').value;$('lShevet').innerHTML='<option value="">בחרו שבט…</option>'+allSh().map(x=>`<option value="${esc(x)}">${shOpt(x)}</option>`).join('');$('lShevet').value=v}
   document.querySelectorAll('[data-role]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.role===regRole));
   $('lBtn').textContent=comp?'סיום הרשמה':reg?'הרשמה וכניסה':fg?(mode==='firebase'?'שליחת מייל לאיפוס':'שליחת בקשה לאיפוס'):'כניסה';
   document.querySelector('p.forgotOnly').textContent=mode==='firebase'?'כתבו את האימייל שאיתו נרשמתם, ונשלח אליו קישור לבחירת סיסמה חדשה.':'כתבו את האימייל שאיתו נרשמתם. הבקשה תגיע לרכז/ת או לשמיניסט/ית של הסניף, והם יקבעו לכם סיסמה זמנית ויעבירו לכם אותה. בכניסה הבאה תתבקשו לבחור סיסמה חדשה.';
@@ -846,7 +868,7 @@ function streakOf(list){
   return n;
 }
 const SHC=['#ff9f43','#ffc93c','#4ab12e','#22b8a6','#55b0ff','#7c6cf2','#ef6fae','#8a99b8'];
-function shvChip(sh){const i=SH_ORDER.indexOf(norm(sh)),c=SHC[i<0?7:i];return `<span class="shchip" style="--c:${c}">${esc(sh)}</span>`}
+function shvChip(sh){const i=shOrder().indexOf(norm(sh)),c=SHC[i<0?7:i%8];return `<span class="shchip" style="--c:${c}">${esc(sh)}</span>`}
 function draftOf(id){const k=kids.find(x=>x._id===id),e=k&&entry(k,week),key=id+'|'+week;
   return drafts[key]||(drafts[key]={arrived:e?e.arrived:'',status:e?e.status:'',step:e?e.step:''})}
 $('myList').addEventListener('click',async ev=>{
@@ -927,7 +949,7 @@ function renderTrack(){
   const nach=cur==='nachshon',sn=mySnifs();
   if(snifSel&&!sn.includes(snifSel))snifSel='';
   $('fPrWrap').classList.toggle('hid',!nach);
-  {const v=$('fSh').value,ex=[...new Set(scopeKids().map(k=>norm(k.shevet)).filter(Boolean))];$('fSh').innerHTML='<option value="">הכול</option>'+[...new Set([...SHEVATIM,...ex])].sort(shvSort).map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');$('fSh').value=v}
+  {const v=$('fSh').value,ex=[...new Set(scopeKids().map(k=>norm(k.shevet)).filter(Boolean))];$('fSh').innerHTML='<option value="">הכול</option>'+[...new Set([...allSh(),...ex])].sort(shvSort).map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');$('fSh').value=v}
   $('snifChips').innerHTML=sn.length>1?[['','כל הסניפים שלי'],...sn.map(s=>[s,s])].map(([v,t])=>`<button data-snif="${esc(v)}" aria-pressed="${v===snifSel}">${esc(t)}</button>`).join(''):'';
   $('rTitle').textContent=(nach?'נחשון':'מדריכים')+' · '+(snifSel||(sn.length===1?sn[0]:'כל הסניפים שלי'));
   $('rLead').textContent=nach?'החניכים במועדונית ובאח גדול, לפי נחשוניסט/ית. לחיצה על שם חניך מציגה את כל ההיסטוריה שלו.':'החניכים של כל מדריך: מה סומן השבוע, ומי עוד לא עודכן. לחיצה על שם חניך מציגה את כל ההיסטוריה שלו.';
@@ -980,6 +1002,8 @@ function renderUsers(){
   const canEd=me.role==='rakaz'||me.role==='admin';$('prOpen').classList.toggle('hid',!canEd);$('lvOpen').classList.toggle('hid',!canEd);
   $('resetBox').classList.toggle('hid',!OWNERS.includes(me.username));
   $('allSnifBox').classList.toggle('hid',!OWNERS.includes(me.username));
+  $('namedBox').classList.toggle('hid',!canEd);
+  $('namedChips').innerHTML=NAMED.map((x,j)=>`<span>${esc(x)} <small style="font-weight:400;color:var(--mut)">(${NAMED_GRADES[j]||'?'})</small><button type="button" data-nrm="${j}" aria-label="הסרת ${esc(x)}">×</button></span>`).join('')||'<span class="small" style="background:none">אין עדיין</span>';
   if(OWNERS.includes(me.username)){const all=[...new Set([...snifNames,...users.filter(u=>u.role==='rakaz'||u.role==='admin').flatMap(u=>snifsOf(u,true))])].sort(heSort);
     $('allSnifChips').innerHTML=all.length?all.map(x=>{const rk=users.filter(u=>(u.role==='rakaz'||u.role==='admin')&&snifsOf(u,true).includes(x)).map(u=>u.name);
       return `<span>${esc(x)}${rk.length?` <small style="font-weight:400;color:var(--mut)">(${esc(rk.join(', '))})</small>`:''}<button type="button" data-arm="${esc(x)}" aria-label="מחיקת ${esc(x)}">×</button></span>`}).join(''):'<span class="small" style="background:none">אין סניפים ברשימה</span>'}
@@ -991,7 +1015,7 @@ function renderUsers(){
   const list=users.filter(u=>u.username===me.username||((u.role!=='admin')&&snifsOf(u).some(s=>sn.includes(s))))
     .sort((a,b)=>heSort(snifsOf(a).join()+a.role+a.name,snifsOf(b).join()+b.role+b.name));
   $('uBody').innerHTML=list.map(u=>{const n=kids.filter(k=>k.madrich===u.username).length,self=u.username===me.username;
-    return `<tr><td><b>${esc(u.name)}</b></td><td><span dir="ltr">${esc(u.username)}</span></td><td>${esc(ROLE[u.role]||u.role)}</td><td>${esc(snifsOf(u,true).join(', '))}</td><td>${u.role==='madrich'?`<select data-ushv="${esc(u.username)}" style="min-height:36px;padding:4px 8px"><option value="">—</option>${[...new Set([...SHEVATIM,...(u.shevet?[u.shevet]:[])])].map(x=>`<option ${x===u.shevet?'selected':''}>${esc(x)}</option>`).join('')}</select>`:''}</td><td>${n||''}</td>
+    return `<tr><td><b>${esc(u.name)}</b></td><td><span dir="ltr">${esc(u.username)}</span></td><td>${esc(ROLE[u.role]||u.role)}</td><td>${esc(snifsOf(u,true).join(', '))}</td><td>${u.role==='madrich'?`<select data-ushv="${esc(u.username)}" style="min-height:36px;padding:4px 8px"><option value="">—</option>${[...new Set([...allSh(),...(u.shevet?[u.shevet]:[])])].map(x=>`<option ${x===u.shevet?'selected':''}>${esc(x)}</option>`).join('')}</select>`:''}</td><td>${n||''}</td>
     <td><button class="sm" data-pw="${esc(u.username)}">${self?'שינוי הסיסמה שלי':mode==='firebase'?'שליחת מייל איפוס':'איפוס סיסמה'}</button>${self||u.role==='rakaz'?'':` <button class="sm del" data-udel="${esc(u.username)}">מחיקה</button>`}</td></tr>`}).join('');
 }
 $('vUsers').addEventListener('change',async e=>{const sl=e.target.closest('[data-ushv]');if(!sl)return;
@@ -1031,6 +1055,11 @@ $('uSnifChips').addEventListener('click',async e=>{const b=e.target.closest('[da
   if(b.dataset.sure!=='1'){b.dataset.sure='1';b.textContent='להסיר?';return}
   if(await saveMySnifim(snifsOf(me,true).filter(x=>x!==b.dataset.urm)))toast(`סניף ${b.dataset.urm} הוסר מהרשימה שלך`)});
 
+async function saveNamed(list){try{await cMeta.doc('shevatim').set(Object.assign({},shvDoc||{},{named:list.slice(0,NAMED_GRADES.length)}));toast('נשמר')}catch(x){toast(mode==='firebase'?fbErr(x):'השמירה נכשלה')}}
+$('namedBtn').addEventListener('click',()=>{const v=norm($('namedAdd').value);if(!v)return;if(shOrder().includes(v)){toast('השם כבר קיים');return}
+  if(NAMED.length>=NAMED_GRADES.length){toast('יש כבר 4 שבטים בוגרים (ט׳–י״ב)');return}saveNamed([...NAMED,v]);$('namedAdd').value=''});
+$('namedChips').addEventListener('click',e=>{const b=e.target.closest('[data-nrm]');if(!b)return;if(b.dataset.sure!=='1'){b.dataset.sure='1';b.textContent='להסיר?';return}
+  saveNamed(NAMED.filter((_,j)=>j!==+b.dataset.nrm))});
 $('allSnifChips').addEventListener('click',async e=>{const b=e.target.closest('[data-arm]');if(!b)return;
   if(b.dataset.sure!=='1'){b.dataset.sure='1';b.textContent='למחוק?';return}
   const x=b.dataset.arm;b.disabled=true;
@@ -1105,7 +1134,7 @@ function readCsv(txt){
   return rows;
 }
 const OLF=[['name','שם החניך/ה (או שם פרטי)',['שם מלא','שם החניך','שם התלמיד','שם הילד','שם פרטי','שם']],['last','שם משפחה (אם בעמודה נפרדת)',['שם משפחה']],
-  ['shevet','שבט',['שבט']],['phone','טלפון חניך',['טלפון חניך','נייד חניך','טלפון תלמיד','נייד','טלפון']],['parents','שם ההורים',['שם ההורים','שם הורה','הורים','שם האם','שם האב']],
+  ['shevet','שבט',['שבט']],['grade','כיתה (אם אין עמודת שבט)',['כיתה','שכבה']],['phone','טלפון חניך',['טלפון חניך','נייד חניך','טלפון תלמיד','נייד','טלפון']],['parents','שם ההורים',['שם ההורים','שם הורה','הורים','שם האם','שם האב']],
   ['pphone','טלפון הורים',['טלפון הורים','טלפון הורה','טלפון אם','טלפון אב','נייד הורה']],['address','כתובת',['כתובת','רחוב','מגורים']],
   ['origin','מאיפה עלו',['ארץ מוצא','מאיפה','ארץ','מדינה','עלו מ']],['year','שנת / תאריך עלייה',['שנת עלייה','שנת עליה','תאריך עלייה','תאריך עליה','עלייה','עליה']],['snif','סניף',['סניף']]];
 function aliyahDate(v){
@@ -1130,7 +1159,7 @@ async function handleOlFile(file){
   imRows={head:rows[hi].map(c=>String(c).trim()),data:rows.slice(hi+1),file:file.name};
   const used=new Set();
   $('imMap').innerHTML=OLF.map(([k,lbl,keys])=>{
-    let g=-1;for(const key of keys){g=imRows.head.findIndex((h,i)=>!used.has(i)&&h.includes(key)&&!(k==='phone'&&/הור|אם|אב/.test(h))&&!(k==='name'&&/משפחה|הור|אם|אב|מדריך/.test(h)));if(g>=0)break}
+    let g=-1;for(const key of keys){g=imRows.head.findIndex((h,i)=>!used.has(i)&&h.includes(key)&&!(k==='phone'&&/הור|אם|אב/.test(h))&&!(['parents','address','origin','name','last','grade','shevet','snif'].includes(k)&&/טלפון|נייד|פלאפון/.test(h))&&!(k==='name'&&/משפחה|הור|אם|אב|מדריך/.test(h)));if(g>=0)break}
     if(g>=0)used.add(g);
     return `<tr><td><b>${lbl}</b></td><td><select data-map="${k}"><option value="-1">— אין —</option>${imRows.head.map((h,i)=>`<option value="${i}" ${i===g?'selected':''}>${esc(h||('עמודה '+(i+1)))}</option>`).join('')}</select></td></tr>`}).join('');
   const sn=mySnifs();$('imSnif').innerHTML=sn.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('')+'<option value="__col">לפי עמודת "סניף" בקובץ</option>';
@@ -1148,7 +1177,7 @@ function imMapped(){
     const d=aliyahDate(g(r,'year'));if(yrs&&d&&d<cut){old++;continue}
     let snif=snifSel==='__col'?norm(g(r,'snif')):snifSel;if(snifSel==='__col'&&!mySnifs().includes(snif)){noSnif++;continue}
     const yv=g(r,'year');
-    out.push({name,shevet:norm(g(r,'shevet')),phone:norm(g(r,'phone')),parents:norm(g(r,'parents')),pphone:norm(g(r,'pphone')),address:norm(g(r,'address')),origin:norm(g(r,'origin')),
+    out.push({name,shevet:toShevet(g(r,'shevet'))||toShevet(g(r,'grade'))||norm(g(r,'shevet')),phone:norm(g(r,'phone')),parents:norm(g(r,'parents')),pphone:norm(g(r,'pphone')),address:norm(g(r,'address')),origin:norm(g(r,'origin')),
       year:d?String(d.getFullYear()):norm(yv),snif});
   }
   return{out,old,noName,noSnif};
@@ -1176,7 +1205,7 @@ $('imGo').addEventListener('click',async()=>{
     let kNew=0,kAs=0,kFix=0,kRed=0;const seen=new Set();
     out.forEach(o=>{const key=o.snif+'|'+olNorm(o.name);if(seen.has(key))return;seen.add(key);
       const k=olMatch(o);
-      if(k){const upd={};if(!k.madrich){const m=pick(o.snif,o.shevet);if(m){kFix++;upd.madrich=m}}
+      if(k){const upd={};if(!k.shevet&&o.shevet)upd.shevet=o.shevet;if(!k.madrich){const m=pick(o.snif,o.shevet||k.shevet);if(m){kFix++;upd.madrich=m}}
         if(!statusAt(k,THIS)){kRed++;upd.initStatus='red'}
         if(Object.keys(upd).length)ops.push(()=>cKids.doc(k._id).update(upd));return}
       const m=pick(o.snif,o.shevet);kNew++;if(m)kAs++;
@@ -1253,14 +1282,25 @@ async function removeStaff(emails){
   for(const em of emails)await cUsers.doc(em).delete();
   return n;
 }
-const YEAR=String(new Date().getFullYear()),LAST_SH=SHEVATIM[SHEVATIM.length-1];
+const YEAR=String(new Date().getFullYear());
 const isRakazMe=()=>me&&(me.role==='rakaz'||me.role==='admin');
 const promoDone=sn=>(promos[YEAR]||{})[sn];
-const nextSh=sh=>{const i=SHEVATIM.indexOf(norm(sh));return i<0?null:(i===SHEVATIM.length-1?'GRAD':SHEVATIM[i+1])};
+// מצב השבטים לפני ההחלפה של השנה (אם רכזת אחרת כבר קבעה את השם החדש – משתמשים בו)
+function promoPlan(){
+  const same=shvDoc&&shvDoc.year===YEAR;
+  const prior=same?[...NAMED.slice(1),...(shvDoc.graduated?[shvDoc.graduated]:[])]:NAMED.slice();
+  return{same,prior,newName:same?NAMED[0]:norm($('prNew')&&$('prNew').value),grad:prior.length>=NAMED_GRADES.length?prior[NAMED_GRADES.length-1]:''};
+}
+const nextSh=sh=>{const p=promoPlan(),x=norm(sh),i=GRADE_SH.indexOf(x);
+  if(i>=0)return i<GRADE_SH.length-1?GRADE_SH[i+1]:(p.newName||'NEW');
+  if(p.grad&&x===p.grad)return'GRAD';return null};
 function openPromo(){
   if(!isRakazMe())return;
   const sn=snifsOf(me,true);
-  $('prOrder').innerHTML=SHEVATIM.map(esc).join(' ← ')+' ← <b>חב"ב</b>';$('prLast').textContent=LAST_SH;
+  const p=promoPlan();
+  $('prOrder').innerHTML=GRADE_SH.map(esc).join(' ← ')+' ← <b>השבט החדש (ט׳)</b>'+(p.prior.length?' · '+p.prior.map((x,j)=>`${esc(x)} (${NAMED_GRADES[j+1]||'בוגרים'})`).join(' · '):'')+' ← <b>חב"ב</b>';
+  $('prNewWrap').classList.toggle('hid',p.same);$('prNewFixed').classList.toggle('hid',!p.same);$('prNewFixed').innerHTML=p.same?`השם של שבט ט׳ החדש כבר נקבע השנה: <b>${esc(NAMED[0])}</b>`:'';
+  $('prGradWrap').classList.toggle('hid',!p.grad);$('prLast').textContent=p.grad;
   $('prSnifs').innerHTML=sn.map(x=>{const d=promoDone(x),n=kids.filter(k=>norm(k.snif)===x&&nextSh(k.shevet)).length;
     return `<label class="chk" style="margin:0"><input type="checkbox" data-prs="${esc(x)}" ${d?'disabled':(n?'checked':'')}> <b>${esc(x)}</b> <span class="small">${d?`– כבר בוצע השנה${d.skipped?' (סומן כ"כבר טיפלנו")':''}`:`– ${n} חניכים יעלו שבט`}</span></label>`}).join('')||'<span class="small">אין לך סניפים</span>';
   $('prErr').textContent='';$('prDlg').showModal();
@@ -1312,6 +1352,9 @@ $('prGo').addEventListener('click',async()=>{
   const sel=[...document.querySelectorAll('[data-prs]:checked')].map(x=>x.dataset.prs);
   if(!sel.length){$('prErr').textContent='בחרו לפחות סניף אחד';return}
   const b=$('prGo');if(b.dataset.sure!=='1'){b.dataset.sure='1';b.textContent='בטוח? לחצו שוב לביצוע';return}
+  const plan=promoPlan();
+  if(!plan.same&&!plan.newName){$('prErr').textContent='כתבו את השם של שבט ט׳ החדש';b.dataset.sure='';b.textContent='ביצוע החלפת שבטים';$('prNew').focus();return}
+  if(!plan.same&&shOrder().includes(plan.newName)){$('prErr').textContent='השם הזה כבר קיים – בחרו שם אחר';b.dataset.sure='';b.textContent='ביצוע החלפת שבטים';return}
   b.disabled=true;$('prErr').textContent='';
   const del=document.querySelector('[name=prGrad]:checked').value==='del',movMad=$('prMad').checked;
   let up=0,grad=0;const ops=[];
@@ -1323,9 +1366,10 @@ $('prGo').addEventListener('click',async()=>{
     if(movMad)users.filter(u=>u.role==='madrich'&&snifsOf(u).some(x=>sel.includes(x))).forEach(u=>{const nx=nextSh(u.shevet);if(!nx)return;
       ops.push(()=>cUsers.doc(u.username).update({shevet:nx==='GRAD'?'':nx}))});
     for(let i=0;i<ops.length;i+=20)await Promise.all(ops.slice(i,i+20).map(f=>f()));
+    if(!plan.same)await cMeta.doc('shevatim').set({named:[plan.newName,...plan.prior].filter(x=>x!==plan.grad).slice(0,NAMED_GRADES.length),year:YEAR,graduated:plan.grad||'',by:me.username,at:new Date().toISOString()});
     await markPromos(sel,{up,grad});
     $('prDlg').close();
-    toast(`בוצע! ${up} חניכים עלו שבט`+(grad?`, ${grad} חניכי ${LAST_SH} ${del?'הוסרו מהמעקב':'עברו לחב"ב'}`:'')+'.');
+    toast(`בוצע! ${up} חניכים עלו שבט`+(grad?`, ${grad} חניכי ${plan.grad} ${del?'הוסרו מהמעקב':'עברו לחב"ב'}`:'')+'.');
   }catch(x){$('prErr').textContent='משהו נכשל באמצע: '+(mode==='firebase'?fbErr(x):'נסו שוב')}
   finally{b.disabled=false;b.dataset.sure='';b.textContent='ביצוע החלפת שבטים'}
 });
@@ -1334,8 +1378,11 @@ $('prGo').addEventListener('click',async()=>{
 function openForm(id){
   editId=id||null;const k=id?kids.find(x=>x._id===id):{};
   $('dlgT').textContent=id?`פרטים: ${k.name||''}`:'חניך/ה חדש/ה';
-  const sv=k.shevet||(!id&&me&&me.shevet)||'';$('f_shevet').innerHTML='<option value="">בחרו שבט…</option>'+[...SH_ORDER,...(sv&&!SH_ORDER.includes(sv)?[sv]:[])].map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');
+  const sv=k.shevet||(!id&&me&&me.shevet)||'';$('f_shevet').innerHTML='<option value="">בחרו שבט…</option>'+[...shOrder(),...(sv&&!shOrder().includes(sv)?[sv]:[])].map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');
   FIELDS.forEach(f=>$('f_'+f).value=k[f]||'');if(!id)$('f_shevet').value=sv;
+  const lock=me&&me.role==='madrich'&&!!(id?k.shevet||me.shevet:me.shevet);$('f_shevet').disabled=lock;
+  if(lock&&!id)$('f_shevet').value=me.shevet;if(lock&&id&&!k.shevet)$('f_shevet').value=me.shevet;
+  $('shLockTxt').classList.toggle('hid',!lock);
   const nach=id?isNach(k):me.role==='nachshon';
   $('prWrap').classList.toggle('hid',!nach);$('f_program').value=id&&isNach(k)?prog(k):'moadonit';
   const showMad=isMgr()&&!!id;$('madWrap').classList.toggle('hid',!showMad);
@@ -1503,7 +1550,8 @@ renderAuth();note('טוען…');
   else{mode='claude';try{db=await claude.use('db')}catch(e){db=null}}
   if(!db){note('אי אפשר להתחבר למאגר הנתונים בתצוגה הזו. פתחו את העמוד כשאתם מחוברים ל-Claude.');return}
   cKids=db.collection('chanichim');cUsers=db.collection('users');cResets=db.collection('resets');cMeta=db.collection('meta');cOlim=db.collection('olim');
-  cMeta.onSnapshot(snap=>{const d=snap.docs.find(x=>x.id==='snifim');snifNames=d?((d.data()||{}).names||[]):[];const pd=snap.docs.find(x=>x.id==='promotions');promos=pd?(pd.data()||{}):{};metaLoaded=true;renderAuth();maybeBackfill();if(me)renderAll()},()=>{metaLoaded=true;renderAuth()});
+  cMeta.onSnapshot(snap=>{const d=snap.docs.find(x=>x.id==='snifim');snifNames=d?((d.data()||{}).names||[]):[];const pd=snap.docs.find(x=>x.id==='promotions');promos=pd?(pd.data()||{}):{};
+    const sd=snap.docs.find(x=>x.id==='shevatim');shvDoc=sd?(sd.data()||{}):null;if(shvDoc&&Array.isArray(shvDoc.named))NAMED=shvDoc.named.slice();metaLoaded=true;renderAuth();maybeBackfill();if(me)renderAll()},()=>{metaLoaded=true;renderAuth()});
   if(mode==='firebase'){
     usersReady=true;note('');renderAll();
     fb.onAuthStateChanged(u=>{fbUser=u;
