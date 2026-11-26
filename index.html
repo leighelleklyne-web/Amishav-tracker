@@ -220,7 +220,35 @@ header.top{background:#fff;color:var(--ink);box-shadow:0 1px 0 var(--line),0 4px
 .maptbl td,.maptbl th{padding:6px 8px}
 .maptbl select{min-height:38px;padding:4px 8px}
 .shv.red{border-top-color:var(--r)}
-@media(prefers-reduced-motion:reduce){.toast,.kid{transition:none}.kid:hover{transform:none}}
+.lead{margin:4px 0 14px;color:var(--mut);font-size:16px;max-width:75ch}
+body{background-image:radial-gradient(circle at 1px 1px,rgba(85,176,255,.13) 1px,transparent 0);background-size:22px 22px}
+.tabs a{gap:6px}.ti{font-size:18px;line-height:1}
+.opt button{border-radius:12px;padding:8px 14px;min-height:46px;font-size:15px}
+.opt button.yes[aria-pressed=true]{background:#e8f7ea;border-color:#3fa526;box-shadow:inset 0 0 0 1px #3fa526}
+.opt button.no[aria-pressed=true]{background:#ffecec;border-color:var(--r);box-shadow:inset 0 0 0 1px var(--r)}
+.opt button.st-green[aria-pressed=true]{background:#e8f7ea;border-color:#3fa526;box-shadow:inset 0 0 0 1px #3fa526}
+.opt button.st-yellow[aria-pressed=true]{background:#fff6d6;border-color:#e0a800;box-shadow:inset 0 0 0 1px #e0a800}
+.opt button.st-red[aria-pressed=true]{background:#ffecec;border-color:var(--r);box-shadow:inset 0 0 0 1px var(--r)}
+.kid{border-radius:16px}.kid label{font-size:13px;color:var(--mut)}
+.shchip{display:inline-block;background:color-mix(in srgb,var(--c) 18%,#fff);color:color-mix(in srgb,var(--c) 70%,#000);border:1px solid color-mix(in srgb,var(--c) 45%,#fff);border-radius:999px;padding:0 10px;font-size:13px;font-weight:700}
+.party{position:relative;overflow:hidden;background:linear-gradient(90deg,#e8f7ea,#fff6d6);border:1px solid #bfe6c4;border-radius:14px;padding:14px 18px;margin:0 0 12px;font-size:17px}
+.cf{position:absolute;inset:0;pointer-events:none}
+.cf i{position:absolute;top:-10px;width:8px;height:12px;border-radius:2px;animation:fall 2.6s ease-in forwards}
+.cf i:nth-child(odd){background:#55b0ff}.cf i:nth-child(even){background:#ffc93c}.cf i:nth-child(3n){background:#4ab12e}.cf i:nth-child(5n){background:#ff7a7a}
+.cf i:nth-child(1){left:7%;animation-delay:0.12s}.cf i:nth-child(2){left:14%;animation-delay:0.24s}.cf i:nth-child(3){left:21%;animation-delay:0.36s}.cf i:nth-child(4){left:28%;animation-delay:0.48s}.cf i:nth-child(5){left:35%;animation-delay:0.00s}.cf i:nth-child(6){left:42%;animation-delay:0.12s}.cf i:nth-child(7){left:49%;animation-delay:0.24s}.cf i:nth-child(8){left:56%;animation-delay:0.36s}.cf i:nth-child(9){left:63%;animation-delay:0.48s}.cf i:nth-child(10){left:70%;animation-delay:0.00s}.cf i:nth-child(11){left:77%;animation-delay:0.12s}.cf i:nth-child(12){left:84%;animation-delay:0.24s}.cf i:nth-child(13){left:91%;animation-delay:0.36s}.cf i:nth-child(14){left:98%;animation-delay:0.48s}
+@keyframes fall{to{transform:translateY(90px) rotate(320deg);opacity:0}}
+.empty.big{padding:34px 20px;font-size:16px;line-height:1.7;background:#fff}
+.howto{border:2px solid var(--sky);background:#f3f9ff;margin:0 0 14px}.howto ol{margin:8px 0 0;padding-inline-start:22px;display:grid;gap:6px}
+.tile{border-radius:18px}.card,.sc,.stat,.shv{border-radius:16px}
+@media(max-width:700px){
+  .tabs{position:fixed;bottom:0;left:0;right:0;z-index:30;background:#fff;justify-content:space-around;flex-wrap:nowrap;padding:6px 4px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -4px 16px rgba(0,41,107,.1);gap:0}
+  .tabs a{flex-direction:column;gap:2px;padding:4px 2px;min-height:52px;font-size:11px;border-radius:12px;flex:1;text-align:center;justify-content:center;opacity:.75}
+  .tabs a[aria-current=page]{background:var(--soft);color:#006bf6}
+  .ti{font-size:22px}
+  body{padding-bottom:84px}
+  .toast{bottom:96px}
+}
+@media(prefers-reduced-motion:reduce){.cf{display:none}.toast,.kid{transition:none}.kid:hover{transform:none}}
 @media(max-width:900px){.bento{grid-template-columns:1fr 1fr}.bento .tile:first-child{grid-column:1/-1}.lgrid{grid-template-columns:1fr}.lgrid .ltiles{order:-1}}
 @media(max-width:600px){.ltiles .tile.sky .deco{display:none}.ltiles .tile.sky h2,.ltiles .tile.sky p{max-width:none}.tile{min-height:120px;padding:18px}.ltiles .tile.sky{min-height:220px}.ltiles .tile:not(.sky){display:none}.me #meName{display:none}.brand span{display:none}}
 @media(max-width:600px){table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-block:10px;border-bottom:1px solid var(--line)}.stack td{display:flow-root;border:0;padding:3px 10px;padding-inline-start:8em;text-align:start}.stack td::before{content:attr(data-l);float:inline-start;width:7.5em;margin-inline-start:-8em;white-space:normal;color:var(--mut)}.stack td:empty{display:none}}
@@ -278,7 +306,9 @@ header.top{background:#fff;color:var(--ink);box-shadow:0 1px 0 var(--line),0 4px
 
   <!-- MADRICH / NACHSHON: my chanichim -->
   <section id="vMine" class="hid">
-    <div class="row"><h2 id="myTitle">החניכים שלי</h2><span class="sp"></span><button id="csvMine">הורדה ל-CSV</button><button class="pri" id="addBtn">+ הוספת חניך/ה</button></div>
+    <div class="row"><h2 id="myTitle">החניכים שלי</h2><span class="sp"></span><button id="csvMine">⬇ CSV</button><button class="pri" id="addBtn">+ הוספת חניך/ה</button></div>
+    <p class="lead">כל שבוע, דקה אחת: מסמנים לכל חניך אם הגיע, איך הוא משתלב ומה הצעד הבא – ולוחצים "שמירה".</p>
+    <div id="party"></div>
     <div class="week" data-week></div>
     <div id="myShevet"></div>
     <div id="myList" class="list" style="margin-top:14px"></div>
@@ -294,13 +324,16 @@ header.top{background:#fff;color:var(--ink);box-shadow:0 1px 0 var(--line),0 4px
       <div class="row" style="margin-top:12px"><button class="pri" id="oSnifSave">שמירה</button><button id="oSnifCancel">ביטול</button></div>
     </div>
     <div class="week" data-week></div>
-    <p class="small" style="margin:0 0 10px">המצב (ירוק/צהוב/אדום) הוא העדכון האחרון של כל חניך עד השבוע הנבחר.</p>
+    <div class="howto card hid" id="howto"><div class="row"><b>👋 איך עובדים עם האתר?</b><span class="sp"></span><button class="sm" id="howtoX">הבנתי, תודה</button></div>
+      <ol><li><b>מוסיפים סניפים</b> בלשונית ⚙️ צוות – ושולחים למדריכים את הקישור להרשמה.</li><li><b>מעלים את רשימת העולים</b> בלשונית 📋 איתור עולים – מי שלא מגיע נכנס אוטומטית באדום ומשויך למדריך של השבט.</li><li><b>המדריכים מעדכנים כל שבוע</b> – ואת רואה כאן ובלשוניות 🧑‍🏫 מדריכים ו-🌱 נחשון מי מגיע, מי לא, ומי עוד לא עודכן.</li></ol></div>
+    <p class="lead">כל סניף במבט אחד. המצב (🟢🟡🔴) הוא העדכון האחרון של כל חניך עד השבוע הנבחר.</p>
     <div class="scards" id="scards"></div>
   </section>
 
   <!-- RAKAZ: detail (amishav or nachshon) -->
   <section id="vTrack" class="hid">
-    <div class="row"><h2 id="rTitle">מעקב</h2><span class="sp"></span><button id="csvBtn">הורדה ל-CSV</button></div>
+    <div class="row"><h2 id="rTitle">מעקב</h2><span class="sp"></span><button id="csvBtn">⬇ CSV</button></div>
+    <p class="lead" id="rLead"></p>
     <div class="chips" id="snifChips"></div>
     <div class="week" data-week></div>
     <div class="stats" id="stats"></div>
@@ -318,8 +351,8 @@ header.top{background:#fff;color:var(--ink);box-shadow:0 1px 0 var(--line),0 4px
 
   <!-- RAKAZ: olim roster -->
   <section id="vOlim" class="hid">
-    <div class="row"><h2 id="oTitle2">רשימת עולים</h2><span class="sp"></span><button id="olCsv">הורדה ל-CSV</button></div>
-    <p class="small" style="margin:4px 0 12px">מעלים קובץ אקסל של העולים באזור, והאתר משווה אותו לחניכים שכבר במערכת. מי שלא מגיע/ה מסומן/ת באדום. עולים מלפני יותר מ-10 שנים לא נכללים.</p>
+    <div class="row"><h2 id="oTitle2">איתור עולים</h2><span class="sp"></span><button id="olCsv">⬇ CSV</button></div>
+    <p class="lead">מעלים את רשימת העולים (אקסל מהעירייה או מהקליטה), והאתר בודק מי כבר מגיע ומי עוד לא – לפי שבט. מי שלא מגיע נכנס אוטומטית <b style="color:var(--r)">באדום</b> ומשויך למדריך של השבט. עולים מלפני יותר מ-10 שנים לא נכללים.</p>
     <label class="upl" id="olDrop"><input type="file" id="olFile" accept=".xlsx,.csv,.txt"><b>📄 העלאת קובץ אקסל (xlsx) או CSV</b><br><span class="small">לחצו לבחירת קובץ, או גררו אותו לכאן</span></label>
     <div class="okmsg hid" id="olResult" style="margin-top:12px"></div>
     <div class="chips" id="olSnifChips"></div>
@@ -334,7 +367,7 @@ header.top{background:#fff;color:var(--ink);box-shadow:0 1px 0 var(--line),0 4px
 
   <!-- RAKAZ: users -->
   <section id="vUsers" class="hid">
-    <div class="row"><h2>הצוות בסניפים שלי</h2><span class="sp"></span><button id="lvOpen" class="hid">👋 מדריכים שעוזבים</button><button id="prOpen" class="hid">🎓 החלפת שבטים שנתית</button></div>
+    <div class="row"><h2>צוות והגדרות</h2><span class="sp"></span><button id="lvOpen" class="hid">👋 מדריכים שעוזבים</button><button id="prOpen" class="hid">🎓 החלפת שבטים שנתית</button></div>
     <div class="card" id="uSnifBox" style="margin:14px 0">
       <b>הסניפים שלי</b>
       <p class="small" style="margin:2px 0 8px">נוסף לך סניף? מוסיפים אותו כאן, והוא יופיע מיד ברשימה של המדריכים בהרשמה.</p>
@@ -426,9 +459,9 @@ header.top{background:#fff;color:var(--ink);box-shadow:0 1px 0 var(--line),0 4px
   <b>באילו סניפים?</b>
   <div id="prSnifs" style="display:grid;gap:4px;margin:6px 0 12px"></div>
   <label class="chk"><input type="checkbox" id="prMad" checked> גם המדריכים עולים שבט יחד עם החניכים שלהם</label>
-  <b>חניכי <span id="prLast"></span> (מסיימים):</b>
-  <label class="chk"><input type="radio" name="prGrad" value="keep" checked> להשאיר במערכת עם השבט "בוגרים"</label>
-  <label class="chk"><input type="radio" name="prGrad" value="del"> למחוק אותם מהמעקב (כולל ההיסטוריה)</label>
+  <b>חניכי שבט <span id="prLast"></span> (מסיימים):</b>
+  <label class="chk"><input type="radio" name="prGrad" value="keep" checked> להעביר לחב"ב – ממשיכים במעקב</label>
+  <label class="chk"><input type="radio" name="prGrad" value="del"> להסיר אותם מהמעקב (לא יופיעו יותר באתר)</label>
   <div class="err" id="prErr"></div>
   <div class="row" style="margin-top:12px"><button class="pri" id="prGo">ביצוע החלפת שבטים</button><button id="prLater">תזכירו לי מחר</button><button id="prSkip">כבר טיפלנו – לא להציג השנה</button></div>
 </div></dialog>
@@ -476,6 +509,7 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const norm=s=>String(s??'').trim();
 const heSort=(a,b)=>String(a).localeCompare(String(b),'he');
 const ST={green:'ירוק',yellow:'צהוב',red:'אדום'};
+const STB={green:'מגיע/ה ומשתלב/ת',yellow:'מגיע/ה מדי פעם',red:'לא מגיע/ה'};
 const STL={green:'מגיעים – חלק מכל דבר',yellow:'מגיעים מדי פעם',red:'לא מגיעים / לא מכירים',none:'עוד לא סומנו'};
 const ROLE={madrich:'מדריך/ה',nachshon:'נחשוניסט/ית',shmini:'שמיניסט/ית',rakaz:'רכז/ת',admin:'רכז/ת'};
 const PROG={snif:'מדריכים',moadonit:'מועדונית',ach:'אח גדול'};
@@ -524,7 +558,8 @@ let week=THIS;
 let db=null,cKids=null,cUsers=null,kids=[],users=[],usersReady=false,me=null,snifSel='',editId=null,pUser=null,authMode='login',regRole='madrich',regSnifs=[],edSnifs=[];
 const OWNERS=['tfutzot@bna.org.il','leighelleklyne@gmail.com'];
 const SHEVATIM=['רגבים','זרעים','נבטים','ניצנים','מעלות','הרא"ה','קדם'];
-const shvSort=(a,b)=>{const i=SHEVATIM.indexOf(a),j=SHEVATIM.indexOf(b);return (i<0?99:i)-(j<0?99:j)||heSort(a,b)};
+const GRAD='חב"ב',SH_ORDER=[...SHEVATIM,GRAD];
+const shvSort=(a,b)=>{const i=SH_ORDER.indexOf(a),j=SH_ORDER.indexOf(b);return (i<0?99:i)-(j<0?99:j)||heSort(a,b)};
 let promos={},kidsLoaded=false,promoAuto=false;
 let snifNames=[],metaLoaded=false,backfilled=false,cMeta=null,cOlim=null,olim=[],olSnif='',imRows=null,asId=null,imResult='';
 const drafts={};let cResets=null,resets=[],mode='local',fb=null,fbUser=null,registering=false,unsubs=[],uOk=false;
@@ -555,8 +590,8 @@ function chipAdd(inp,el,arr){const v=norm(inp.value);if(v&&!arr.includes(v))arr.
 function tabsFor(){
   if(!me)return[];
   if(isMgr()){const sn=mySnifs(),n=resets.filter(r=>r.email!==me.username&&userBy(r.email)&&snifsOf(userBy(r.email)).some(s=>sn.includes(s))).length;
-    return[['overview','תמונת מצב'],['track','מעקב מדריכים'],['nachshon','מעקב נחשון'],['olim','עולים'],['users','צוות'+(n?` (${n})`:'')]]}
-  return[['mine',me.role==='nachshon'?'החניכים שלי בנחשון':'החניכים שלי']];
+    return[['overview','תמונת מצב','🏠'],['track','מדריכים','🧑‍🏫'],['nachshon','נחשון','🌱'],['olim','איתור עולים','📋'],['users','צוות'+(n?` (${n})`:''),'⚙️']]}
+  return[['mine',me.role==='nachshon'?'החניכים שלי בנחשון':'החניכים שלי','🧒']];
 }
 let cur='';
 function route(){
@@ -566,7 +601,7 @@ function route(){
   if(logged)$('meName').textContent=`${me.name} · ${ROLE[me.role]||''}`;
   $('hero').classList.toggle('hid',!logged);
   const t=tabsFor(),h=location.hash.slice(1);cur=t.find(x=>x[0]===h)?h:(t[0]||[''])[0];
-  $('tabs').innerHTML=t.length>1?t.map(([k,v])=>`<a href="#${k}" ${k===cur?'aria-current="page"':''}>${v}</a>`).join(''):'';
+  $('tabs').innerHTML=t.length>1?t.map(([k,v,ic])=>`<a href="#${k}" ${k===cur?'aria-current="page"':''}><span class="ti" aria-hidden="true">${ic}</span><span class="tl">${v}</span></a>`).join(''):'';
   $('vMine').classList.toggle('hid',!logged||cur!=='mine');
   $('vOver').classList.toggle('hid',!logged||cur!=='overview');
   $('vTrack').classList.toggle('hid',!logged||(cur!=='track'&&cur!=='nachshon'));
@@ -765,7 +800,7 @@ function renderMine(){
   const nach=me.role==='nachshon';
   $('myTitle').textContent=`${nach?'החניכים שלי בנחשון':'החניכים שלי'} · ${me.name}`+(mySnifs()[0]?` · סניף ${mySnifs()[0]}`:'');
   const list=kids.filter(k=>k.madrich===me.username).sort((a,b)=>heSort(prog(a)+a.name,prog(b)+b.name)),done=list.filter(k=>entry(k,week)).length;
-  if(!list.length){$('myShevet').innerHTML='';$('myList').innerHTML=`<div class="empty">עוד אין חניכים ברשימה. לחצו "הוספת חניך/ה" כדי להתחיל.</div>`;return}
+  if(!list.length){$('myShevet').innerHTML='';$('party').innerHTML='';$('myList').innerHTML=`<div class="empty big"><div style="font-size:44px">🧒👧</div><b>עוד אין חניכים ברשימה שלך</b><br>לוחצים על <b>"+ הוספת חניך/ה"</b> למעלה – או מחכים שהרכז/ת תעלה את רשימת העולים, והחניכים של השבט שלך יופיעו כאן לבד.</div>`;return}
   const byS={};list.forEach(k=>{const s=norm(k.shevet)||'ללא שבט';(byS[s]=byS[s]||[]).push(k)});
   const shs=Object.keys(byS).sort(shvSort);
   $('myShevet').innerHTML=`<h3 style="font-size:22px;margin:4px 0 8px">סיכום לפי שבט</h3><div class="shv-row">${shs.map(s=>{const g=byS[s],c=x=>g.filter(k=>statusAt(k,week)===x).length,es=g.map(k=>entry(k,week)).filter(Boolean);
@@ -782,19 +817,29 @@ function renderMine(){
     const ph=[k.phone&&('חניך '+k.phone),k.pphone&&('הורים '+k.pphone)].filter(Boolean).map(esc).join(' · ');
     return head+`<article class="kid ${esc(st)} ${e?'done':''}" data-id="${esc(k._id)}">
       <div class="row"><span class="av ${esc(st)}" aria-hidden="true">${esc(String(k.name||'?').trim().charAt(0))}</span><h3>${esc(k.name)}</h3>${isNach(k)?`<span class="prog-tag">${PROG[prog(k)]}</span>`:''}<span class="tag">עודכן ✓</span></div>
-      <div class="m">${[k.shevet&&('שבט '+k.shevet),k.origin&&('עלו מ'+k.origin)].filter(Boolean).map(esc).join(' · ')}${ph?`<br><span dir="auto">${ph}</span>`:''}</div>
+      <div class="m">${k.shevet?shvChip(k.shevet)+' ':''}${[k.origin&&('עלו מ'+k.origin)].filter(Boolean).map(esc).join(' · ')}${ph?`<br><span dir="auto">${ph}</span>`:''}</div>
       ${prev&&prev.step?`<div class="prev"><b>בשבוע שעבר תכננו:</b> ${esc(prev.step)}</div>`:''}
       <div><label>${arrLabel(k)}</label><div class="opt">
-        <button type="button" data-f="arrived" data-v="yes" aria-pressed="${d.arrived==='yes'}">כן</button>
-        <button type="button" data-f="arrived" data-v="no" aria-pressed="${d.arrived==='no'}">לא</button></div></div>
-      <div><label>מצב השתלבות</label><div class="opt">
-        ${['green','yellow','red'].map(s=>`<button type="button" data-f="status" data-v="${s}" aria-pressed="${d.status===s}"><span class="dot ${s}"></span>${ST[s]}</button>`).join('')}</div></div>
+        <button type="button" class="yes" data-f="arrived" data-v="yes" aria-pressed="${d.arrived==='yes'}">✅ כן</button>
+        <button type="button" class="no" data-f="arrived" data-v="no" aria-pressed="${d.arrived==='no'}">❌ לא</button></div></div>
+      <div><label>איך הוא/היא משתלב/ת?</label><div class="opt">
+        ${['green','yellow','red'].map(s=>`<button type="button" class="st-${s}" data-f="status" data-v="${s}" aria-pressed="${d.status===s}"><span class="dot ${s}"></span>${STB[s]}</button>`).join('')}</div></div>
       <div><label for="st_${esc(k._id)}">צעד לשבוע–שבועיים</label><textarea id="st_${esc(k._id)}" data-step="${esc(k._id)}">${esc(d.step)}</textarea></div>
       <div class="row"><button class="pri sm" data-save="${esc(k._id)}">${e?'עדכון':'שמירה לשבוע הזה'}</button><span class="sp"></span>
         <button class="sm" data-hist="${esc(k._id)}">היסטוריה</button><button class="sm" data-edit="${esc(k._id)}">פרטים</button></div>
     </article>`}).join('');
   if(aid){const t=document.querySelector(`[data-step="${CSS.escape(aid)}"]`);if(t){t.focus();t.setSelectionRange(t.value.length,t.value.length)}}
+  const all=list.length&&list.every(k=>entry(k,week));
+  $('party').innerHTML=all?`<div class="party" role="status"><span class="cf" aria-hidden="true">${'<i></i>'.repeat(14)}</span>🎉 <b>כל הכבוד!</b> עדכנת את כל ${list.length} החניכים לשבוע הזה${streakOf(list)>1?` · 🔥 רצף של ${streakOf(list)} שבועות`:''}</div>`:'';
 }
+function streakOf(list){
+  if(!list.length)return 0;let w=list.every(k=>entry(k,THIS))?THIS:addWeeks(THIS,-1),n=0;
+  while(n<104&&list.every(k=>entry(k,w)||(k.created&&k.created.slice(0,10)>addWeeks(w,1))))
+    {if(list.some(k=>entry(k,w)))n++;else break;w=addWeeks(w,-1)}
+  return n;
+}
+const SHC=['#ff9f43','#ffc93c','#4ab12e','#22b8a6','#55b0ff','#7c6cf2','#ef6fae','#8a99b8'];
+function shvChip(sh){const i=SH_ORDER.indexOf(norm(sh)),c=SHC[i<0?7:i];return `<span class="shchip" style="--c:${c}">${esc(sh)}</span>`}
 function draftOf(id){const k=kids.find(x=>x._id===id),e=k&&entry(k,week),key=id+'|'+week;
   return drafts[key]||(drafts[key]={arrived:e?e.arrived:'',status:e?e.status:'',step:e?e.step:''})}
 $('myList').addEventListener('click',async ev=>{
@@ -838,7 +883,9 @@ function snifCard(name,list,total){
     ${total?'':`<div class="row"><button class="sm" data-go="track" data-s="${esc(name)}">פירוט מדריכים</button><button class="sm" data-go="nachshon" data-s="${esc(name)}">פירוט נחשון</button></div>`}
   </article>`;
 }
+$('howtoX').addEventListener('click',()=>{store.set('am_howto','1');$('howto').classList.add('hid')});
 function renderOver(){
+  $('howto').classList.toggle('hid',!!store.get('am_howto'));
   if(!isMgr())return;
   const sn=mySnifs();
   if(!sn.length){$('scards').innerHTML=`<div class="empty">עוד לא הגדרת סניפים. לחצו "עריכת הסניפים שלי".</div>`;return}
@@ -875,7 +922,8 @@ function renderTrack(){
   $('fPrWrap').classList.toggle('hid',!nach);
   {const v=$('fSh').value,ex=[...new Set(scopeKids().map(k=>norm(k.shevet)).filter(Boolean))];$('fSh').innerHTML='<option value="">הכול</option>'+[...new Set([...SHEVATIM,...ex])].sort(shvSort).map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');$('fSh').value=v}
   $('snifChips').innerHTML=sn.length>1?[['','כל הסניפים שלי'],...sn.map(s=>[s,s])].map(([v,t])=>`<button data-snif="${esc(v)}" aria-pressed="${v===snifSel}">${esc(t)}</button>`).join(''):'';
-  $('rTitle').textContent=(nach?'מעקב נחשון':'מעקב מדריכים')+' · '+(snifSel||(sn.length===1?sn[0]:'כל הסניפים שלי'));
+  $('rTitle').textContent=(nach?'🌱 נחשון':'🧑‍🏫 מדריכים')+' · '+(snifSel||(sn.length===1?sn[0]:'כל הסניפים שלי'));
+  $('rLead').textContent=nach?'החניכים במועדונית ובאח גדול, לפי נחשוניסט/ית. לחיצה על שם חניך מציגה את כל ההיסטוריה שלו.':'החניכים של כל מדריך: מה סומן השבוע, ומי עוד לא עודכן. לחיצה על שם חניך מציגה את כל ההיסטוריה שלו.';
   const base=scopeKids(),es=base.map(k=>entry(k,week)).filter(Boolean),c=s=>es.filter(e=>e.status===s).length;
   $('stats').innerHTML=[[base.length,'חניכים',''],[es.length+'/'+base.length,'עודכנו השבוע',''],[es.filter(e=>e.arrived==='yes').length,nach?'הגיעו / נפגשו':'הגיעו השבוע',''],
     [c('green'),'ירוק','green'],[c('yellow'),'צהוב','yellow'],[c('red'),'אדום','red']]
@@ -1205,7 +1253,7 @@ const nextSh=sh=>{const i=SHEVATIM.indexOf(norm(sh));return i<0?null:(i===SHEVAT
 function openPromo(){
   if(!isRakazMe())return;
   const sn=snifsOf(me,true);
-  $('prOrder').innerHTML=SHEVATIM.map(esc).join(' ← ')+' ← <b>בוגרים</b>';$('prLast').textContent=LAST_SH;
+  $('prOrder').innerHTML=SHEVATIM.map(esc).join(' ← ')+' ← <b>חב"ב</b>';$('prLast').textContent=LAST_SH;
   $('prSnifs').innerHTML=sn.map(x=>{const d=promoDone(x),n=kids.filter(k=>norm(k.snif)===x&&nextSh(k.shevet)).length;
     return `<label class="chk" style="margin:0"><input type="checkbox" data-prs="${esc(x)}" ${d?'disabled':(n?'checked':'')}> <b>${esc(x)}</b> <span class="small">${d?`– כבר בוצע השנה${d.skipped?' (סומן כ"כבר טיפלנו")':''}`:`– ${n} חניכים יעלו שבט`}</span></label>`}).join('')||'<span class="small">אין לך סניפים</span>';
   $('prErr').textContent='';$('prDlg').showModal();
@@ -1262,15 +1310,15 @@ $('prGo').addEventListener('click',async()=>{
   let up=0,grad=0;const ops=[];
   try{
     kids.filter(k=>sel.includes(norm(k.snif))).forEach(k=>{const nx=nextSh(k.shevet);if(!nx)return;
-      if(nx==='GRAD'){grad++;ops.push(()=>del?cKids.doc(k._id).delete():cKids.doc(k._id).update({shevet:'בוגרים'}))}else{up++;ops.push(()=>cKids.doc(k._id).update({shevet:nx}))}});
+      if(nx==='GRAD'){grad++;ops.push(()=>cKids.doc(k._id).update(del?{shevet:GRAD,archived:true}:{shevet:GRAD}))}else{up++;ops.push(()=>cKids.doc(k._id).update({shevet:nx}))}});
     olim.filter(o=>sel.includes(norm(o.snif))).forEach(o=>{const nx=nextSh(o.shevet);if(!nx)return;
-      ops.push(()=>nx==='GRAD'?(del?cOlim.doc(o._id).delete():cOlim.doc(o._id).update({shevet:'בוגרים'})):cOlim.doc(o._id).update({shevet:nx}))});
+      ops.push(()=>nx==='GRAD'?cOlim.doc(o._id).update(del?{shevet:GRAD,archived:true}:{shevet:GRAD}):cOlim.doc(o._id).update({shevet:nx}))});
     if(movMad)users.filter(u=>u.role==='madrich'&&snifsOf(u).some(x=>sel.includes(x))).forEach(u=>{const nx=nextSh(u.shevet);if(!nx)return;
       ops.push(()=>cUsers.doc(u.username).update({shevet:nx==='GRAD'?'':nx}))});
     for(let i=0;i<ops.length;i+=20)await Promise.all(ops.slice(i,i+20).map(f=>f()));
     await markPromos(sel,{up,grad});
     $('prDlg').close();
-    toast(`בוצע! ${up} חניכים עלו שבט`+(grad?`, ${grad} חניכי ${LAST_SH} ${del?'נמחקו':'עברו ל"בוגרים"'}`:'')+'.');
+    toast(`בוצע! ${up} חניכים עלו שבט`+(grad?`, ${grad} חניכי ${LAST_SH} ${del?'הוסרו מהמעקב':'עברו לחב"ב'}`:'')+'.');
   }catch(x){$('prErr').textContent='משהו נכשל באמצע: '+(mode==='firebase'?fbErr(x):'נסו שוב')}
   finally{b.disabled=false;b.dataset.sure='';b.textContent='ביצוע החלפת שבטים'}
 });
@@ -1279,7 +1327,7 @@ $('prGo').addEventListener('click',async()=>{
 function openForm(id){
   editId=id||null;const k=id?kids.find(x=>x._id===id):{};
   $('dlgT').textContent=id?`פרטים: ${k.name||''}`:'חניך/ה חדש/ה';
-  const sv=k.shevet||(!id&&me&&me.shevet)||'';$('f_shevet').innerHTML='<option value="">בחרו שבט…</option>'+[...SHEVATIM,...(sv&&!SHEVATIM.includes(sv)?[sv]:[])].map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');
+  const sv=k.shevet||(!id&&me&&me.shevet)||'';$('f_shevet').innerHTML='<option value="">בחרו שבט…</option>'+[...SH_ORDER,...(sv&&!SH_ORDER.includes(sv)?[sv]:[])].map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');
   FIELDS.forEach(f=>$('f_'+f).value=k[f]||'');if(!id)$('f_shevet').value=sv;
   const nach=id?isNach(k):me.role==='nachshon';
   $('prWrap').classList.toggle('hid',!nach);$('f_program').value=id&&isNach(k)?prog(k):'moadonit';
@@ -1382,13 +1430,14 @@ function renderHero(){
   const list=mgr?kids.filter(k=>sn.includes(norm(k.snif))):kids.filter(k=>k.madrich===me.username);
   const es=list.map(k=>entry(k,week)).filter(Boolean),upd=es.length,came=es.filter(e=>e.arrived==='yes').length;
   const red=list.filter(k=>statusAt(k,week)==='red').length,pc=list.length?Math.round(upd/list.length*100):0;
-  const first=String(me.name||'').split(' ')[0];
+  const first=String(me.name||'').split(' ')[0],hr=new Date().getHours(),greet=hr<5?'לילה טוב':hr<12?'בוקר טוב':hr<17?'צהריים טובים':hr<21?'ערב טוב':'לילה טוב';
   const sub=mgr?(sn.length?`${ROLE[me.role]} · ${sn.join(', ')}`:ROLE[me.role]):`${ROLE[me.role]}${sn[0]?' · סניף '+sn[0]:''}`;
   $('hero').innerHTML=`<div class="tile sky"><svg class="deco" viewBox="0 0 600 200" preserveAspectRatio="xMinYMid slice" aria-hidden="true"><defs><path id="st2" d="M0-14C2-4 4-2 14 0 4 2 2 4 0 14-2 4-4 2-14 0-4-2-2-4 0-14Z"/></defs><g fill="#fff"><use href="#st2" transform="translate(60 50) scale(1.4)" opacity=".85"/><use href="#st2" transform="translate(130 140) scale(.7)" opacity=".6"/><use href="#st2" transform="translate(30 120) scale(.5)" opacity=".5"/></g></svg>
-      <div><h2>שלום, ${esc(first)}!</h2><p style="margin-top:6px">${esc(sub)}</p></div>
+      <div><h2>${greet}, ${esc(first)}!</h2><p style="margin-top:6px">${esc(sub)}</p></div>
       <div><div class="lbl">עודכנו ${upd} מתוך ${list.length} לשבוע ${esc(weekLabel(week))}</div><div class="barw" style="margin-top:6px"><i style="width:${pc}%"></i></div></div></div>
     <div class="tile leaf"><span class="lbl">${mgr?'הגיעו השבוע':'הגיעו השבוע מהחניכים שלי'}</span><span class="num">${came}</span><span>מתוך ${list.length} חניכים</span></div>
-    <div class="tile coral"><span class="lbl">צריכים תשומת לב</span><span class="num">${red}</span><span>חניכים במצב אדום</span></div>`;
+    ${mgr?`<div class="tile coral"><span class="lbl">צריכים תשומת לב</span><span class="num">${red}</span><span>חניכים במצב אדום</span></div>`
+      :`<div class="tile sun"><span class="lbl">🔥 רצף עדכונים</span><span class="num">${streakOf(list)}</span><span>${streakOf(list)===1?'שבוע':'שבועות'} ברצף שעדכנת את כולם${red?` · ${red} באדום`:''}</span></div>`}`;
 }
 
 function renderAll(){
@@ -1422,9 +1471,9 @@ function startSubs(){
     if(fresh(snap)){uOk=true;usersReady=true;ready()}else if(users.length)usersReady=true;
     restore();maybeBackfill();renderAll();
   },fail));
-  unsubs.push(cOlim.onSnapshot(snap=>{olim=snap.docs.map(d=>Object.assign({_id:d.id},d.data()));if(me)renderAll()},()=>{}));
+  unsubs.push(cOlim.onSnapshot(snap=>{olim=snap.docs.map(d=>Object.assign({_id:d.id},d.data())).filter(o=>!o.archived);if(me)renderAll()},()=>{}));
   unsubs.push(cKids.onSnapshot(snap=>{
-    kids=snap.docs.map(d=>Object.assign({_id:d.id},d.data()));
+    kids=snap.docs.map(d=>Object.assign({_id:d.id},d.data())).filter(k=>!k.archived);
     if(fresh(snap)){kOk=true;kidsLoaded=true;ready()}
     renderAll();
   },fail));
